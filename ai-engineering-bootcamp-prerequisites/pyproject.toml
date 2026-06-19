@@ -8,5 +8,8 @@ dependencies = [
     "google-genai>=2.8.0",
     "ipykernel>=7.3.0",
     "openai>=2.43.0",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
     "python-dotenv>=1.2.2",
+    "streamlit>=1.58.0",
 ]

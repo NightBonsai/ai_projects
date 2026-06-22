@@ -93,7 +93,7 @@ uv run python --version			# Python 3.12.11
 ```
 
 ```powershell
-uv run pip list
+uv pip list
 ```
 
 确认依赖是否都已安装

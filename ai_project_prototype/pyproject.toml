@@ -1,5 +1,5 @@
 [project]
-name = "ai-engineering-bootcamp-prerequisites"
+name = "ai_project_prototype"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -18,4 +18,9 @@ dependencies = [
 members = [
     "apps/api",
     "apps/chatbot_ui",
+]
+
+[dependency-groups]
+dev = [
+    "matplotlib>=3.11.0",
 ]

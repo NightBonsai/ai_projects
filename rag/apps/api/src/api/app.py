@@ -13,10 +13,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# 初始化 FastAPI 服务器
 app = FastAPI()
 
+# 注册中间件
+# 所有请求，先经过中间件，再进入接口
 app.add_middleware(RequestIDMiddleware)
-app.add_middleware(
+app.add_middleware(         
+    # 允许 Streamlit 前端访问
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
@@ -24,6 +28,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 注册路由
+# 接口去 api_router 里面找
 app.include_router(api_router)
 
 

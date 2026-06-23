@@ -46,6 +46,7 @@ def run_llm(provider, model_name, messages, reasoning_effort="minimal", max_toke
         ).choices[0].message.content
 
 
+# 数据结构
 class ChatRequest(BaseModel):
     provider: str
     models_name: str
@@ -54,10 +55,11 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     message: str
 
-app = FastAPI()
 
-@app.post("/chat")
-def chat(
+# 提供给前端 Streamlit 调用后端服务的接口
+app = FastAPI()         # 初始化接口
+@app.post("/chat")      # 注册接口
+def chat(               # 接口处理函数
     request: Request,
     payload: ChatRequest
 ) -> ChatResponse:

@@ -22,7 +22,7 @@ def rag(                        # 接口处理函数
     answer = rag_pipeline(payload.query)
     return RAGResponse(
         request_id=request.state.request_id,
-        answer=answer
+        answer=answer["answer"]
     )
 
 api_router = APIRouter()        # 初始化总接口: 包含多个子接口

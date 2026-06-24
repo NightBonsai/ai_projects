@@ -1,4 +1,4 @@
-# Streamlit & FastAPI Connection Test
+# Streamlit & FastAPI Connection
 
 ## FastAPI
 

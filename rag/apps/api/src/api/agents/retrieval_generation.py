@@ -1,12 +1,10 @@
 from openai import OpenAI
-from qdrant_client import QdrantClient
 from dotenv import load_dotenv
 from langsmith import traceable, get_current_run_tree     # langsmith 可观测平台: 追踪有 @traceable 标签的函数
 
 
 load_dotenv()
 client = OpenAI()
-qdrant_client = QdrantClient(url="http://qdrant:6333/")
 
 
 @traceable(
@@ -132,7 +130,7 @@ def generate_answer(prompt):
 @traceable(
     name="rag_pipeline"
 )
-def rag_pipeline(question, top_k=5):
+def rag_pipeline(question, qdrant_client, top_k=5):
 
     retrieved_context = retrieve_data(question, qdrant_client, top_k)
     preprocessed_context = process_context(retrieved_context)

@@ -1,4 +1,5 @@
 from fastapi import Request, APIRouter
+from qdrant_client import QdrantClient
 import logging
 
 from api.api.models import RAGRequest, RAGResponse
@@ -11,6 +12,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+qdrant_client = QdrantClient(url="http://qdrant:6333/")
+
 
 # 提供给前端 Streamlit 调用后端服务的接口
 rag_router = APIRouter()        # 初始化接口
@@ -19,7 +22,7 @@ def rag(                        # 接口处理函数
     request: Request,
     payload: RAGRequest
 ) -> RAGResponse:
-    answer = rag_pipeline(payload.query)
+    answer = rag_pipeline(payload.query, qdrant_client)
     return RAGResponse(
         request_id=request.state.request_id,
         answer=answer["answer"]

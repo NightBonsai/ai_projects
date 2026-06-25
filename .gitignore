@@ -10,3 +10,6 @@
 # 所有项目的 Qdrant 向量数据库
 **/qdrant_storage/
 
+# 所有项目的 Python 缓存
+**/__pycache__/
+**/*.pyc

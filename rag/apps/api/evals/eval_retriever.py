@@ -1,5 +1,4 @@
-# RAG evaluation (have issues)
-
+# RAG evaluation (old version: have issues)
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -12,6 +11,7 @@ from langchain_openai import OpenAIEmbeddings
 # ragas: RAG 评估框架
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
+
 from ragas.dataset_schema import SingleTurnSample
 from ragas.metrics import IDBasedContextPrecision, IDBasedContextRecall, Faithfulness, ResponseRelevancy
 
@@ -31,9 +31,9 @@ ragas_embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings(model="text-embed
 async def ragas_faithfulness(run, example):
     """Faithfulness 忠实度评估: 生成的回答有没有瞎编 (是否基于检索到的上下文)"""
     sample = SingleTurnSample(
-        user_input=run.outputs["question"],
-        response=run.outputs["answer"],
-        retrieved_contexts=run.outputs["retrieved_context"]
+        user_input=run["question"],
+        response=run["answer"],
+        retrieved_contexts=run["retrieved_context"]
     )
     scorer = Faithfulness(llm=ragas_llm)
 
@@ -82,5 +82,5 @@ results = ls_client.evaluate(
         ragas_context_recall_id_based
     ],
     experiment_prefix="retriever",      
-    max_concurrency=1,
+    max_concurrency=10,
 )

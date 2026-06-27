@@ -7,6 +7,7 @@ ls_client = Client()
 
 
 def prompt_template_config(yaml_file, prompt_key):
+    """获取存储在本地 Prompt"""
     with open(yaml_file, 'r') as file:
         config = yaml.safe_load(file)
     
@@ -18,7 +19,7 @@ def prompt_template_config(yaml_file, prompt_key):
 
 
 def prompt_template_registry(prompt_name):
-
+    """获取存储在 LangSmith 平台的 Prompt"""
     template_content = ls_client.pull_prompt(prompt_name).messages[0].prompt.template
 
     template = Template(template_content)

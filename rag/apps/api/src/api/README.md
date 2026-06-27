@@ -22,11 +22,9 @@ FastAPI 入口
 
 
 
-### agents/retrieval_generation.py
+### agents/*
 
-实现 RAG 核心功能
-
-使用 LangSmith 监控 RAG 过程
+retrieval_generation.py:	实现 RAG 核心功能，使用 LangSmith 监控 RAG 过程
 
 ```
 用户提问
@@ -54,6 +52,17 @@ OpenAI
 Streamlit 显示回复
 ```
 
+prompts/*				存储 Prompts				
+
+utils/*
+
+```
+utils		
+    ├── prompt_management.py	# 管理 Prompts
+    ├── ...
+    └── ...
+```
+
 
 
 ### api/*
@@ -70,3 +79,6 @@ api_router			# 主接口
 middleware.py:     定义中间件（请求进入 FastAPI 前的处理）
 
 models.py:	     定义数据模型/传输用数据结构
+
+
+

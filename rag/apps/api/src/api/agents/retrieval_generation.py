@@ -63,13 +63,15 @@ def retrieve_data(query, qdrant_client, k=5):
     
     results = qdrant_client.query_points(
         collection_name="Amazon-items-collection-01-hybrid-search",
+
+        # 混合检索 hybrid search
         prefetch=[
-            Prefetch(
+            Prefetch(                   # Embedding 语义检索
                 query=query_embedding,
                 using="text-embedding-3-small",
                 limit=20
             ),
-            Prefetch(
+            Prefetch(                   # BM25 关键词检索
                 query=Document(
                     text=query,
                     model="qdrant/bm25"
@@ -78,7 +80,7 @@ def retrieve_data(query, qdrant_client, k=5):
                 limit=20
             )
         ],
-        query=FusionQuery(fusion="rrf"),
+        query=FusionQuery(fusion="rrf"),    # 把两个排序融合
         limit=k,
     )
 

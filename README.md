@@ -25,6 +25,10 @@ cursor IDE
    - LangSmith 可观测 debug 平台部署
    - 测试集生成 & 存入数据库
    - 结构化输出实现
+   
+     ```
+     Pydantic + Instructor
+     ```
    - 混合检索实现
    
      ```

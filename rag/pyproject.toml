@@ -22,6 +22,7 @@ members = [
 
 [dependency-groups]
 dev = [
+    "fastembed>=0.8.0",
     "langchain-community==0.4.1",
     "langgraph==1.0.5",
     "langsmith>=0.9.1",

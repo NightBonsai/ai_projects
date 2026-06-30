@@ -17,7 +17,7 @@ resolution-markers = [
 members = [
     "api",
     "chatbot-ui",
-    "rag",
+    "rag_agent",
 ]
 
 [[package]]
@@ -1787,15 +1787,15 @@ wheels = [
 
 [[package]]
 name = "langgraph-prebuilt"
-version = "1.0.13"
+version = "1.0.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
     { name = "langgraph-checkpoint" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b5/a4/f8ac75fa7c503103f0cf7680944e28bbaaef74c19a8d163d7346869cc369/langgraph_prebuilt-1.0.13.tar.gz", hash = "sha256:ad219782a80e1718e7e7794de49e0ae307111d45cbcffab9a52725a66a609456", size = 172913, upload-time = "2026-04-30T01:48:15.742Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/f9/54f8891b32159e4542236817aea2ee83de0de18bce28e9bdba08c7f93001/langgraph_prebuilt-1.0.5.tar.gz", hash = "sha256:85802675ad778cc7240fd02d47db1e0b59c0c86d8369447d77ce47623845db2d", size = 144453, upload-time = "2025-11-20T16:47:39.23Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/69/ef/5ada0bef4013ef5ae53a0ca1de5736517f1076a54d313f156ca545ec65d5/langgraph_prebuilt-1.0.13-py3-none-any.whl", hash = "sha256:7055e9fad41fbd3593800aed0aea0a6e974b17f33ed51b80d3d3a031212dd7c0", size = 37214, upload-time = "2026-04-30T01:48:14.507Z" },
+    { url = "https://files.pythonhosted.org/packages/87/5e/aeba4a5b39fe6e874e0dd003a82da71c7153e671312671a8dacc5cb7c1af/langgraph_prebuilt-1.0.5-py3-none-any.whl", hash = "sha256:22369563e1848862ace53fbc11b027c28dd04a9ac39314633bb95f2a7e258496", size = 35072, upload-time = "2025-11-20T16:47:38.187Z" },
 ]
 
 [[package]]
@@ -3200,7 +3200,7 @@ wheels = [
 ]
 
 [[package]]
-name = "rag"
+name = "rag_agent"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
@@ -3219,6 +3219,7 @@ dev = [
     { name = "fastembed" },
     { name = "langchain-community" },
     { name = "langgraph" },
+    { name = "langgraph-prebuilt" },
     { name = "langsmith" },
     { name = "matplotlib" },
     { name = "qdrant-client" },
@@ -3242,6 +3243,7 @@ dev = [
     { name = "fastembed", specifier = ">=0.8.0" },
     { name = "langchain-community", specifier = "==0.4.1" },
     { name = "langgraph", specifier = "==1.0.5" },
+    { name = "langgraph-prebuilt", specifier = "==1.0.5" },
     { name = "langsmith", specifier = ">=0.9.1" },
     { name = "matplotlib", specifier = ">=3.11.0" },
     { name = "qdrant-client", specifier = ">=1.18.0" },

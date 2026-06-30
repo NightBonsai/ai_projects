@@ -10,9 +10,32 @@ uv python包管理器
 
 cursor IDE
 
+
+
 ### 运行环境
 
-Docker
+Docker Desktop
+
+Docker 占用磁盘过多，执行以下指令进行清理
+
+```
+docker system df				# 查看 Docker 磁盘占用情况
+docker image ls					# 查看本地镜像
+docker ps -a					# 查看本地容器
+
+docker builder prune -a			# 删除所有构建缓存
+docker container prune -f		# 删除所有已退出的容器
+docker image prune -a			# 删除没有任何容器引用的镜像
+```
+
+清理后，在指定子项目根目录下重新构建即可
+
+```
+uv sync
+docker compose up --build	
+```
+
+
 
 ### 已完成内容
 
@@ -55,6 +78,8 @@ Docker
      ```
      jinja2
      ```
+
+
 
 ### 环境搭建
 

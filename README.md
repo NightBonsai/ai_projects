@@ -37,50 +37,6 @@ docker compose up --build
 
 
 
-### 已完成内容
-
-1. 项目原型构建: 
-   - Streamlit 前端 
-   - FastAPI 后端
-   
-2. RAG 系统实现：
-   
-   - 数据集获取 & 提取
-   - Qdrant 向量数据库部署
-   - 数据集 Embedding 处理 & 存入数据库
-   - RAG 流程实现
-   - LangSmith 可观测 debug 平台部署
-   - 测试集生成 & 存入数据库
-   - RAG 评估
-   
-     ```
-     ragas (old version have issues)
-     ```
-   - 结构化输出实现
-   
-     ```
-     Pydantic + Instructor
-     ```
-   - 混合检索实现
-   
-     ```
-     Embedding 相似度 + bm25 关键词检索 
-     ```
-   
-   - 混合检索结果重新排列
-   
-     ```
-     Cohere / Qwen Rerank / BGE Reranker
-     ```
-   
-   - Prompt 管理实现
-   
-     ```
-     jinja2
-     ```
-
-
-
 ### 环境搭建
 
 1. 安装 Python 3.12 or 3.14
@@ -139,6 +95,48 @@ docker compose up --build
      ```
 
      
+
+### 已完成内容
+
+1. 项目原型构建: 
+   - Streamlit 前端 
+   - FastAPI 后端
+   
+2. RAG 系统实现：
+   
+   - 数据集获取 & 提取
+   - Qdrant 向量数据库部署
+   - 数据集 Embedding 处理 & 存入数据库
+   - RAG 流程实现
+   - LangSmith 可观测 debug 平台部署
+   - 测试集生成 & 存入数据库
+   - RAG 评估
+   
+     ```
+     ragas (old version have issues)
+     ```
+   - 结构化输出实现
+   
+     ```
+     Pydantic + Instructor
+     ```
+   - 混合检索实现
+   
+     ```
+     Embedding 相似度 + bm25 关键词检索 
+     ```
+   
+   - 混合检索结果重新排列
+   
+     ```
+     Cohere / Qwen Rerank / BGE Reranker
+     ```
+   
+   - Prompt 管理实现
+   
+     ```
+     jinja2
+     ```
 
 
 

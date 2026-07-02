@@ -1,3 +1,8 @@
+"""
+整体弃用
+-- 重构为 Agent 的 Tools
+-- 但仍被用于 RAG 评估
+"""
 import instructor
 import numpy as np
 

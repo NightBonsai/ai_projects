@@ -1,8 +1,14 @@
 # ai_projects
 
-## RAG
+## RAG_Agent
 
-实现 检索 Retrieval + 增强 Augmented + 生成 Generation 流程      
+实现 检索 Retrieval + 增强 Augmented + 生成 Generation 的固定 Pipeline Chain 流程 (已弃用)
+
+实现 封装 RAG 为 Tool 供 Agent 调用的 ReAct Agent 架构 
+
+```
+LLM 负责决策，Tool 负责执行，Graph 负责控制整个流程
+```
 
 
 

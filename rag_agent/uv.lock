@@ -17,7 +17,7 @@ resolution-markers = [
 members = [
     "api",
     "chatbot-ui",
-    "rag_agent",
+    "rag-agent",
 ]
 
 [[package]]
@@ -198,6 +198,7 @@ dependencies = [
     { name = "fastapi" },
     { name = "google-genai" },
     { name = "instructor" },
+    { name = "langgraph" },
     { name = "langsmith" },
     { name = "openai" },
     { name = "pydantic" },
@@ -212,6 +213,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.137.2" },
     { name = "google-genai", specifier = ">=2.8.0" },
     { name = "instructor", specifier = ">=1.15.3" },
+    { name = "langgraph", specifier = "==1.0.5" },
     { name = "langsmith", specifier = ">=0.9.1" },
     { name = "openai", specifier = ">=2.43.0" },
     { name = "pydantic", specifier = ">=2.13.4" },
@@ -3200,7 +3202,7 @@ wheels = [
 ]
 
 [[package]]
-name = "rag_agent"
+name = "rag-agent"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

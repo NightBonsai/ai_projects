@@ -6,9 +6,15 @@
 
 
 
-# RAG
+# RAG_Agent
 
-实现 检索 Retrieval + 增强 Augmented + 生成 Generation 流程      
+实现 检索 Retrieval + 增强 Augmented + 生成 Generation 的固定 Pipeline Chain 流程 
+
+实现 封装 RAG 流程为 Tool 供 Agent 调用的 ReAct-Style Tool Calling Agent 架构 
+
+```
+LLM 负责决策，Tool 负责执行，Graph 负责控制整个流程
+```
 
 
 
@@ -21,3 +27,9 @@
 ### evals/*
 
 RAG 评估源码
+
+
+
+### pyproject.toml
+
+开发环境配置文件

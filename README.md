@@ -102,7 +102,7 @@ docker compose up --build
    - Streamlit 前端 
    - FastAPI 后端
    
-2. RAG 系统实现：
+2. RAG 流程实现：
    
    - 数据集获取 & 提取
    - Qdrant 向量数据库部署
@@ -138,5 +138,12 @@ docker compose up --build
      jinja2
      ```
 
+3. Agent 系统实现：
 
+   - 重构 RAG 固定流程为 ReAct-Style Tool Calling Agent
 
+     ```
+     LangGraph
+     ```
+
+     

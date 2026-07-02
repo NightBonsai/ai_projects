@@ -24,33 +24,33 @@ qdrant_client = QdrantClient(url="http://qdrant:6333/")
 
 ### State ###
 class State(BaseModel):
-    messages: Annotated[List[Any], add] = []
-    question_relevant: bool = False 
-    iteration: int = 0
-    answer: str = ""
-    available_tools: List[Dict[str, Any]] = []
-    tool_calls: List[ToolCall] = []
-    final_answer: bool = False
-    references: Annotated[List[RAGUsedContext], add] = []
+    messages: Annotated[List[Any], add] = []                # 对话历史: HumanMessage、AIMessage、ToolMessage
+    question_relevant: bool = False                         # 问题是否属于商品领域
+    iteration: int = 0                                      # 当前 Agent 循环次数
+    answer: str = ""                                        # 当前 Agent 生成回答
+    available_tools: List[Dict[str, Any]] = []              # Tool 描述
+    tool_calls: List[ToolCall] = []                         # LLM 输出的 Tool Call
+    final_answer: bool = False                              # 是否结束 or 继续循环生成答案
+    references: Annotated[List[RAGUsedContext], add] = []   # 回答引用的商品
 
 
 ### Edges ###
-def tool_router(state: State) -> str:
-    """Decide whether to continue or end."""
+def intent_router_conditional_edges(state: State):
     
-    if state.final_answer:
-        return "end"
-    elif state.iteration > 2:
-        return "end"
-    elif len(state.tool_calls) > 0:
-        return "tools"
+    if state.question_relevant:     # 用户问题是否相关
+        return "agent_node"
     else:
         return "end"
 
-def intent_router_conditional_edges(state: State):
+def tool_router(state: State) -> str:
+    """Decide whether to continue or end."""
     
-    if state.question_relevant:
-        return "agent_node"
+    if state.final_answer:          # 是否为最终回答
+        return "end"
+    elif state.iteration > 2:       # 是否超过最大循环次数
+        return "end"
+    elif len(state.tool_calls) > 0: # Agent 请求调用 Tool
+        return "tools"
     else:
         return "end"
 

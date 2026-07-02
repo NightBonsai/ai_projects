@@ -6,9 +6,15 @@
 
 
 
-# RAG
+# RAG_Agent
 
-实现 检索 Retrieval + 增强 Augmented + 生成 Generation 流程      
+实现 检索 Retrieval + 增强 Augmented + 生成 Generation 的固定 Pipeline Chain 流程 
+
+实现 封装 RAG 流程为 Tool 供 Agent 调用的 ReAct-Style Tool Calling Agent 架构 
+
+```
+LLM 负责决策，Tool 负责执行，Graph 负责控制整个流程
+```
 
 
 
@@ -24,7 +30,7 @@ FastAPI 入口
 
 ### agents/*
 
-retrieval_generation.py:	实现 RAG 核心功能，使用 LangSmith 监控 RAG 过程
+retrieval_generation.py:	实现 RAG 固定流程 & 使用 LangSmith 监控 RAG 过程 **(已弃用)**
 
 ```
 用户提问
@@ -52,14 +58,86 @@ OpenAI
 Streamlit 显示回复
 ```
 
-prompts/*				存储 Prompts				
+graph.py				    构建 LangGraph Workflow
 
-utils/*
+agents.py				  定义 LangGraph Workflow 节点
+
+tools.py				     定义 LangGraph Workflow 可调用工具
+
+```
+用户提问
+    ↓
+Streamlit UI
+    ↓
+POST /rag/
+    ↓
+rag()                    ← 自定义 FastAPI 接口函数
+    ↓
+rag_agent_wrapper()
+    ↓
+run_agent()
+    ↓
+graph.invoke(initial_state)
+    ↓
+LangGraph Workflow
+```
+
+```
+LangGraph Workflow
+                START
+                  │
+                  ▼
+      intent_router_node
+      判断是不是商品问题
+                  │
+        ┌─────────┴─────────┐
+        │                   │
+        ▼                   ▼
+   question_relevant      END
+        │
+        ▼
+    agent_node
+ 	LLM 思考下一步
+        │
+        ▼
+   tool_router()
+        │
+   ┌────┴─────────────┐
+   │                  │
+   ▼                  ▼
+ToolNode             END
+执行 Tool
+   │
+   ▼
+messages += ToolMessage
+   │
+   ▼
+agent_node
+再次思考
+   │
+   ▼
+tool_router()
+   │
+   ├──需要工具────► 重新循环 ToolNode
+   │
+   └──回答完成────► END
+```
+
+prompts/*				存储 Prompts	
+
+```
+prompts	
+    ├── intent_router_agent.yaml	# 用户意图识别 Prompt
+    ├── qa_agent.yaml				# 主问答 Agent Prompt
+    └── retrieval_generation.yaml	# RAG 固定流程脚本使用的 Prompt (已弃用)
+```
+
+utils/*					存储功能函数
 
 ```
 utils		
     ├── prompt_management.py	# 管理 Prompts
-    ├── ...
+    ├── utils.py				# 管理功能函数
     └── ...
 ```
 
@@ -67,7 +145,7 @@ utils
 
 ### api/*
 
-endpoints.py:	定义真正的接口
+endpoints.py:	定义 FastAPI 调用的真正的接口
 
 ```
 api_router			# 主接口

@@ -16,6 +16,7 @@ from api.agents.utils.prompt_management import prompt_template_config
 load_dotenv()
 
 
+# 数据模型 (数据结构) → 结构化输出 (LLM 必须按照指定数据结构输出 JSON)
 ### QnA Agent Response Model ###
 class ToolCall(BaseModel):
     name: str
@@ -26,7 +27,7 @@ class RAGUsedContext(BaseModel):
     description: str = Field(description="Short description of the item used to answer the question")
 
 class AgentResponse(BaseModel):
-    answer: str= Field(description="Answer to the question.")
+    answer: str = Field(description="Answer to the question.")
     references: List[RAGUsedContext] = Field(description="List of items used to answer the question.")
     final_answer: bool = False
     tool_calls: List[ToolCall] = []
@@ -38,6 +39,7 @@ class IntentRouterResponse(BaseModel):
     answer: str
 
 
+# LangGraph Workflow Node
 ### Intent Router Agent Node ###
 @traceable(
     name="intent_router_node",
@@ -46,17 +48,19 @@ class IntentRouterResponse(BaseModel):
 )
 def intent_router_node(state):
 
+    # 获取 Prompt
     template = prompt_template_config("api/agents/prompts/intent_router_agent.yaml", "intent_router_agent")
     prompt = template.render()
     
-    messages = state.messages
-
+    # 获取当前 Conversation 
     conversation = []
+    messages = state.messages
     for message in messages:
         conversation.append(convert_to_openai_messages(message))
 
+    # LLM 根据 Prompt 思考
+    # 用户问题是否属于库存商品 ( 属于 返回 True / 不属于 返回 False )
     client = instructor.from_openai(OpenAI())
-    
     response, raw_response = client.chat.completions.create_with_completion(
         model="gpt-4.1-mini",
         response_model=IntentRouterResponse,
@@ -78,17 +82,20 @@ def intent_router_node(state):
 )
 def agent_node(state) -> dict:
 
+    # 获取 Prompt
     template = prompt_template_config("api/agents/prompts/qa_agent.yaml", "qa_agent")
     prompt = template.render(
         available_tools=state.available_tools
     )
 
-    messages = state.messages
-
+    # 获取当前 Conversation 
     conversation = []
+    messages = state.messages
     for message in messages:
         conversation.append(convert_to_openai_messages(message))
     
+    # LLM 根据 Prompt 思考
+    # 是否调用 Tool or 是否已经得到最终答案
     client = instructor.from_openai(OpenAI())
     response, raw_response = client.chat.completions.create_with_completion(
         model="gpt-4.1-mini",
@@ -96,8 +103,7 @@ def agent_node(state) -> dict:
         messages=[{"role": "system", "content": prompt}, *conversation],
         temperature=0.5
     )
-
-    ai_message = format_ai_message(response)
+    ai_message = format_ai_message(response)        # 将 Instructor 输出转换为 LangChain AIMessage
 
     return {
         "messages": [ai_message],

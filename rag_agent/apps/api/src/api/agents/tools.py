@@ -102,7 +102,7 @@ def process_context(context):
     return formatted_context
 
 
-# RAG 流程处理封装为工具函数，供 Agent 调用
+# RAG 流程封装为工具函数，供 Agent 调用
 def get_formatted_context(query: str, top_k: int = 5) -> str:
 
     """Get the top k context,each representing an inventory item for a given query.

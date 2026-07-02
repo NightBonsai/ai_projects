@@ -15,7 +15,7 @@ from api.agents.utils.prompt_management import prompt_template_config
 
 
 load_dotenv()
-client = OpenAI()
+openai_client = OpenAI()
 qdrant_client = QdrantClient(url="http://qdrant:6333/")
 instructor_client = instructor.from_openai(OpenAI())
 
@@ -37,7 +37,7 @@ class RAGGenerationResponse(BaseModel):
     metadata={"ls_provider": "openai", "ls_model_name": "text-embedding-3-small"}
 )
 def get_embedding(text, model="text-embedding-3-small"):
-    response = client.embeddings.create(
+    response = openai_client.embeddings.create(
         input=text,
         model=model,
     )

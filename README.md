@@ -154,7 +154,7 @@ docker compose up --build
    - 重构 RAG 固定流程为 ReAct-Style Tool Calling Agent
 
      ```
-     LangGraph
+     LangGraph: 用户意图识别 + 用户查询重写 + ReAct-Style Tool Calling
      ```
 
    - 多轮对话实现

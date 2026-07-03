@@ -6,7 +6,7 @@
 
 
 
-# RAG_Agent
+# Agentic_RAG
 
 实现 检索 Retrieval + 增强 Augmented + 生成 Generation 的固定 Pipeline Chain 流程 
 

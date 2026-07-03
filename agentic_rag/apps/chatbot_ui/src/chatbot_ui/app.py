@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import uuid
 
 from chatbot_ui.core.config import config
 
@@ -11,6 +12,15 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+
+# 多轮对话设置: 随机设置当前会话 thread_id
+def get_session_id():
+    if 'session_id' not in st.session_state:
+        st.session_state.session_id=str(uuid.uuid4())
+    return st.session_state.session_id
+
+session_id = get_session_id()
 
 
 # 前后端 Streamlit & FastAPI 通信统一接口
@@ -92,8 +102,12 @@ if prompt := st.chat_input("Hello! How can I assist you today?"):
 
     # Assistant 回答
     with st.chat_message("assistant"):
-        status, output = api_call("post", f"{config.API_URL}/rag", json={"query": prompt})  # 调用 FastAPI 后端接口
-
+        status, output = api_call(
+            "post", 
+            f"{config.API_URL}/rag", 
+            json={"query": prompt, "thread_id": session_id} # 调用 FastAPI 后端接口
+        )  
+        
         answer = output["answer"]                       # 提取 llm 最终回答
         used_context = output["used_context"]           # 提取 llm 从知识库真正引用的商品信息
 

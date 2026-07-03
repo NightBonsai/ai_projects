@@ -7,6 +7,7 @@ from qdrant_client.models import Filter, FieldCondition, MatchValue
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
+from langgraph.checkpoint.postgres import PostgresSaver
 
 from typing import Dict, Any, Annotated, List
 from operator import add
@@ -85,24 +86,33 @@ workflow.add_conditional_edges(
 )
 workflow.add_edge("tool_node", "agent_node")
 
-graph = workflow.compile()
-
 
 ### Agent Execution Function ###
-def run_agent(question, top_k=5):
+def run_agent(question: str, thread_id: str) -> dict:
+    
     initial_state = {
         "messages": [{"role": "user", "content": question}],
         "iteration": 0,
         "available_tools": tool_descriptions
     }
 
-    result = graph.invoke(initial_state)
+    # 多轮对话设置
+    config = {                      
+        "configurable": {
+            "thread_id": thread_id
+        }
+    }
+
+    # 多轮对话
+    with PostgresSaver.from_conn_string("postgresql://langgraph_user:langgraph_password@postgres:5432/langgraph_db") as checkpointer:
+        graph = workflow.compile(checkpointer=checkpointer)
+        result = graph.invoke(initial_state, config)
 
     return result
 
-def rag_agent_wrapper(question):
+def rag_agent_wrapper(question, thread_id):
     
-    result = run_agent(question)
+    result = run_agent(question, thread_id)
     
     # 通过 LLM 查询得到的商品 ID ，再一次去数据库查详细信息
     # -- 第一次数据库查询: Embedding Similarity

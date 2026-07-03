@@ -20,7 +20,9 @@ def rag(                        # 接口处理函数
     request: Request,
     payload: RAGRequest
 ) -> RAGResponse:
-    answer = rag_agent_wrapper(payload.query)
+
+    answer = rag_agent_wrapper(payload.query, payload.thread_id)
+    
     return RAGResponse(
         request_id=request.state.request_id,
         answer=answer["answer"],

@@ -1,5 +1,9 @@
 # ai_projects
 
+------
+
+
+
 ### 开发环境
 
 Windows11
@@ -9,6 +13,8 @@ Python 3.12 or 3.14
 uv python包管理器
 
 cursor IDE
+
+------
 
 
 
@@ -34,6 +40,8 @@ docker image prune -a			# 删除没有任何容器引用的镜像
 uv sync
 docker compose up --build	
 ```
+
+------
 
 
 
@@ -94,7 +102,10 @@ docker compose up --build
      http://localhost:6333/dashboard
      ```
 
-     
+
+------
+
+
 
 ### 已完成内容
 
@@ -146,4 +157,11 @@ docker compose up --build
      LangGraph
      ```
 
+   - 多轮对话实现
+   
+     ```
+     PostgresSQL 数据库: 存储 Agent 运行状态 & Checkpoint 聊天历史
+     ```
+   
      
+

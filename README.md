@@ -149,7 +149,7 @@ docker compose up --build
      jinja2
      ```
 
-3. Agent 系统实现：
+3. Agentic RAG 系统实现：
 
    - 重构 RAG 固定流程为 ReAct-Style Tool Calling Agent
 

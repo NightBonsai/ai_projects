@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List
 
-from langsmith import traceable
+from langsmith import traceable, get_current_run_tree
 
 from langchain_core.messages import convert_to_openai_messages
 
@@ -68,9 +68,22 @@ def intent_router_node(state):
         temperature=0.5,
     )
 
+    # LangSmith 记录 Token 使用情况
+    current_run = get_current_run_tree()
+    if current_run:
+        current_run.metadata["usage_metadata"] = {
+            "input_tokens": raw_response.usage.prompt_tokens,
+            "output_tokens": raw_response.usage.completion_tokens,
+            "total_tokens": raw_response.usage.total_tokens
+        }
+        trace_id = str(getattr(current_run, "trace_id", current_run.id))
+    else:
+        trace_id = None
+
     return {
         "question_relevant": response.question_relevant,
-        "answer": response.answer
+        "answer": response.answer,
+        "trace_id": trace_id
     }
 
 
@@ -104,6 +117,15 @@ def agent_node(state) -> dict:
         temperature=0.5
     )
     ai_message = format_ai_message(response)        # 将 Instructor 输出转换为 LangChain AIMessage
+
+    # LangSmith 记录 Token 使用情况
+    current_run = get_current_run_tree()
+    if current_run:
+        current_run.metadata["usage_metadata"] = {
+            "input_tokens": raw_response.usage.prompt_tokens,
+            "output_tokens": raw_response.usage.completion_tokens,
+            "total_tokens": raw_response.usage.total_tokens
+        }
 
     return {
         "messages": [ai_message],

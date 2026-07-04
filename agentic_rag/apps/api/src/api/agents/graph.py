@@ -33,6 +33,7 @@ class State(BaseModel):
     tool_calls: List[ToolCall] = []                         # LLM 输出的 Tool Call
     final_answer: bool = False                              # 是否结束 or 继续循环生成答案
     references: Annotated[List[RAGUsedContext], add] = []   # 回答引用的商品
+    trace_id: str = ""
 
 
 ### Edges ###
@@ -147,6 +148,7 @@ def rag_agent_wrapper(question, thread_id):
     
     return {
         "answer": result.get("answer", ""),
-        "used_context": used_context
+        "used_context": used_context,
+        "trace_id": result.get("trace_id", "")
     }
 

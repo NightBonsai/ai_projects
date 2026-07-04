@@ -1,7 +1,5 @@
 # ai_projects
 
-------
-
 
 
 ### 开发环境
@@ -163,5 +161,5 @@ docker compose up --build
      PostgresSQL 数据库: 存储 Agent 运行状态 & Checkpoint 聊天历史
      ```
    
-     
+   - 商品评论数据集写入 Qdrant & 商品查询查询 Tool 实现
 

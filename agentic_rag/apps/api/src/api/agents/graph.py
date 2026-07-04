@@ -15,7 +15,7 @@ from operator import add
 
 from api.agents.agents import agent_node, intent_router_node
 from api.agents.agents import ToolCall, RAGUsedContext
-from api.agents.tools import get_formatted_context
+from api.agents.tools import get_formatted_context, get_formatted_reviews_context
 from api.agents.utils.utils import get_tool_descriptions
 
 
@@ -59,7 +59,7 @@ def tool_router(state: State) -> str:
 ### Workflow ###
 workflow = StateGraph(State)
 
-tools = [get_formatted_context]
+tools = [get_formatted_context, get_formatted_reviews_context]
 tool_node = ToolNode(tools)
 tool_descriptions = get_tool_descriptions(tools)
 

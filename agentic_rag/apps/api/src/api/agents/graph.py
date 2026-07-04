@@ -33,7 +33,7 @@ class State(BaseModel):
     tool_calls: List[ToolCall] = []                         # LLM 输出的 Tool Call
     final_answer: bool = False                              # 是否结束 or 继续循环生成答案
     references: Annotated[List[RAGUsedContext], add] = []   # 回答引用的商品
-    trace_id: str = ""
+    trace_id: str = ""                                      # 一轮对话的 LangSmith Trace ID
 
 
 ### Edges ###

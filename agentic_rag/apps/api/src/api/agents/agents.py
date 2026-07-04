@@ -68,7 +68,7 @@ def intent_router_node(state):
         temperature=0.5,
     )
 
-    # LangSmith 记录 Token 使用情况
+    # LangSmith 记录 Token 使用情况 & 当前对话 Trace ID
     current_run = get_current_run_tree()
     if current_run:
         current_run.metadata["usage_metadata"] = {

@@ -162,4 +162,6 @@ docker compose up --build
      ```
    
    - 商品评论数据集写入 Qdrant & 商品查询查询 Tool 实现
+   
+   - 接收用户反馈功能实现
 

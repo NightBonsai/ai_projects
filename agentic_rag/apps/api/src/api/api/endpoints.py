@@ -1,10 +1,12 @@
+from starlette.responses import StreamingResponse
 from fastapi import Request, APIRouter
 import logging
 
 from api.api.models import RAGRequest, RAGResponse, RAGUsedContext, FeedbackRequest, FeedbackResponse
 from api.api.processors.submit_feedback import submit_feedback
-# from api.agents.retrieval_generation import rag_pipeline_wrapper    # 固定写死的 RAG 流程已弃用
-from api.agents.graph import rag_agent_wrapper
+from api.agents.graph import rag_agent_stream_wrapper
+# from api.agents.retrieval_generation import rag_pipeline_wrapper    # 固定写死的 RAG 流程 (已弃用)
+# from api.agents.graph import rag_agent_wrapper                      # 非流式输出 (已弃用)
 
 
 logging.basicConfig(
@@ -16,20 +18,34 @@ logger = logging.getLogger(__name__)
 
 # 提供给前端 Streamlit 调用后端服务的接口
 ### Agentic RAG 服务接口 ###
+# 旧端口: 非流式输出 (已弃用)
+# rag_router = APIRouter()        # 初始化接口
+# @rag_router.post("/")           # 注册接口
+# def rag(                        # 接口处理函数
+#     request: Request,
+#     payload: RAGRequest
+# ) -> RAGResponse:
+
+#     answer = rag_agent_wrapper(payload.query, payload.thread_id)
+    
+#     return RAGResponse(
+#         request_id=request.state.request_id,
+#         answer=answer["answer"],
+#         used_context=[RAGUsedContext(**used_context) for used_context in answer["used_context"]],
+#         trace_id=answer["trace_id"]
+#     )
+
+# 新端口: 流式输出
 rag_router = APIRouter()        # 初始化接口
 @rag_router.post("/")           # 注册接口
 def rag(                        # 接口处理函数
     request: Request,
     payload: RAGRequest
-) -> RAGResponse:
+) -> StreamingResponse:         # 流式输出
 
-    answer = rag_agent_wrapper(payload.query, payload.thread_id)
-    
-    return RAGResponse(
-        request_id=request.state.request_id,
-        answer=answer["answer"],
-        used_context=[RAGUsedContext(**used_context) for used_context in answer["used_context"]],
-        trace_id=answer["trace_id"]
+    return StreamingResponse(
+        rag_agent_stream_wrapper(payload.query, payload.thread_id),
+        media_type="text/event-stream"
     )
 
 
@@ -57,17 +73,7 @@ def send_feedback(
 # ├── feedback_router
 # └── ...
 api_router = APIRouter()        
-api_router.include_router(
-    rag_router, 
-    prefix="/rag",              # http://localhost:8000/rag/
-    tags=["rag"]
-)
-api_router.include_router(
-    feedback_router, 
-    prefix="/submit_feedback",  # http://localhost:8000/submit_feedback/
-    tags=["feedback"]
-)
-
-
+api_router.include_router(rag_router, prefix="/rag", tags=["rag"])                          # http://localhost:8000/rag/ 
+api_router.include_router(feedback_router, prefix="/submit_feedback", tags=["feedback"])    # http://localhost:8000/submit_feedback/
 
 

@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import uuid
 import logging
+import json
 
 from chatbot_ui.core.config import config
 
@@ -31,6 +32,7 @@ session_id = get_session_id()
 
 # 前后端 Streamlit & FastAPI 通信统一接口
 ### Agentic RAG 接口 ###
+# 非流式输出接口
 def api_call(method, url, **kwargs):
 
     def _show_error_popup(message):
@@ -53,6 +55,31 @@ def api_call(method, url, **kwargs):
 
         return False, response_data
 
+    except requests.exceptions.ConnectionError:
+        _show_error_popup("Connection error. Please check your network connection.")
+        return False, {"message": "Connection error"}
+    except requests.exceptions.Timeout:
+        _show_error_popup("The request timed out. Please try again later.")
+        return False, {"message": "Request timeout"}
+    except Exception as e:
+        _show_error_popup(f"An unexpected error occurred: {str(e)}")
+        return False, {"message": str(e)}
+
+# 流式输出接口
+def api_call_stream(method, url, **kwargs):
+
+    def _show_error_popup(message):
+        """Show error message as a popup in the top-right corner."""
+        st.session_state["error_popup"] = {
+            "visible": True,
+            "message": message,
+        }
+    
+    try:
+        response = getattr(requests, method)(url, **kwargs)
+    
+        return response.iter_lines()
+    
     except requests.exceptions.ConnectionError:
         _show_error_popup("Connection error. Please check your network connection.")
         return False, {"message": "Connection error"}
@@ -227,20 +254,59 @@ if prompt := st.chat_input("Hello! How can I assist you today?"):
 
     # Assistant 回答
     with st.chat_message("assistant"):
-        status, output = api_call(
-            "post", 
-            f"{config.API_URL}/rag", 
-            json={"query": prompt, "thread_id": session_id} # 调用 FastAPI 后端接口
-        )  
+
+        # 流式输出
+        status_placeholder = st.empty()
+        message_placeholder = st.empty()
+        for line in api_call_stream(                    # 调用 FastAPI 后端接口: 流式输出形式
+            "post",
+            f"{config.API_URL}/rag",
+            json={"query": prompt, "thread_id": session_id},    
+            stream=True,
+            headers={"Accept": "text/event-stream"}
+        ):
+            line_text = line.decode("utf-8")
+            if line_text.startswith("data: "):
+                data = line_text[6:]
+            
+                try:
+                    output=json.loads(data)
+
+                    if output["type"] == "final_result":
+                        answer = output["data"]["answer"]               # 提取 llm 最终回答
+                        used_context = output["data"]["used_context"]   # 提取 llm 从知识库真正引用的商品信息
+                        trace_id = output["data"]["trace_id"]
+
+                        st.session_state.used_context = used_context    # 引用知识库信息保存到 Session State，Sidebar 会读取这里的数据
+                        st.session_state.messages.append({"role": "assistant", "content": answer})  # 保存 Assistant 回复
+                        st.session_state.trace_id = trace_id
+
+                        st.session_state.latest_feedback = None
+                        st.session_state.show_feedback_box = False
+                        st.session_state.feedback_submission_status = None
+
+                        status_placeholder.empty()
+                        message_placeholder.markdown(answer)    # 主聊天窗口显示 llm 回答
+                        break
+                
+                except json.JSONDecodeError:
+                    status_placeholder.markdown(f"*{data}*")
+
+        # 非流式输出 (已弃用)
+        # status, output = api_call(
+        #     "post", 
+        #     f"{config.API_URL}/rag", 
+        #     json={"query": prompt, "thread_id": session_id} # 调用 FastAPI 后端接口
+        # )  
         
-        answer = output["answer"]                       # 提取 llm 最终回答
-        used_context = output["used_context"]           # 提取 llm 从知识库真正引用的商品信息
-        trace_id = output["trace_id"]
+        # answer = output["answer"]                       # 提取 llm 最终回答
+        # used_context = output["used_context"]           # 提取 llm 从知识库真正引用的商品信息
+        # trace_id = output["trace_id"]
 
-        st.session_state.used_context = used_context    # 引用知识库信息保存到 Session State，Sidebar 会读取这里的数据
-        st.session_state.trace_id = trace_id            
+        # st.session_state.used_context = used_context    # 引用知识库信息保存到 Session State，Sidebar 会读取这里的数据
+        # st.session_state.trace_id = trace_id            
 
-        st.write(answer)                                # 主聊天窗口显示 llm 回答
+        # st.write(answer)                                # 主聊天窗口显示 llm 回答
 
-    st.session_state.messages.append({"role":"assistant", "content":answer})    # 保存 Assistant 回复
-    st.rerun()                                                                  # 重新运行整个 Streamlit 页面
+    # st.session_state.messages.append({"role":"assistant", "content": answer})    # 保存 Assistant 回复
+    st.rerun()                                                                   # 重新运行整个 Streamlit 页面

@@ -20,7 +20,7 @@ cursor IDE
 
 Docker Desktop
 
-Docker 占用磁盘过多，执行以下指令进行清理
+若 Docker 占用磁盘过多，执行以下指令进行清理
 
 ```
 docker system df				# 查看 Docker 磁盘占用情况
@@ -164,4 +164,14 @@ docker compose up --build
    - 商品评论数据集写入 Qdrant & 商品查询查询 Tool 实现
    
    - 接收用户反馈功能实现
+   
+   - MCP 封装 Tools (未实现)
+   
+   - Agent 工作流状态 流式输出功能 实现
+   
+     ```
+     SSE (Server-Sent Events)
+     ```
+   
+     
 

@@ -173,5 +173,11 @@ docker compose up --build
      SSE (Server-Sent Events)
      ```
    
+   - 购物车数据库初始化 & 数据库增删改查工具实现
+   
+     ```
+     Postgres + SQL script + DBeaver
+     ```
+   
      
 

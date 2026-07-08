@@ -1,6 +1,4 @@
-# ai_projects
-
-## ai_project_prototype
+# ai_project_prototype
 
 可复用的 AI 项目原型
 

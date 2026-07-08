@@ -1,6 +1,18 @@
-# Amazon Shopping Assistant
+# ai_projects
 
-### 开发环境
+## 项目信息
+
+### ai_project_prototype
+
+基于 Streamlit 和 FastAPI 的 AI 项目原型
+
+### agentic_rag (Amazon Shopping Assistant)
+
+基于 Coordinator + Specialist Agents 的 Multi-Agent 协同 Agentic RAG 架构的 Amazon 网购智能助手
+
+
+
+## 开发环境
 
 Windows11
 
@@ -14,7 +26,7 @@ cursor IDE
 
 
 
-### 运行环境
+## 运行环境
 
 Docker Desktop
 
@@ -41,7 +53,7 @@ docker compose up --build
 
 
 
-### 环境搭建
+## 环境搭建
 
 1. 安装 [Python](https://www.python.org/) (3.12 或 3.14)
 
@@ -95,7 +107,7 @@ docker compose up --build
 
 
 
-### 已完成内容
+## 已完成内容
 
 1. 项目原型构建: 
    - Streamlit 前端 
@@ -180,7 +192,6 @@ docker compose up --build
      ```
 
      ![multi-agents-image](./agentic_rag/images/multi-agents-image.png)
-  
    
-
+   
 

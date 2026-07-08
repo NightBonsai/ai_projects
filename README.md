@@ -181,7 +181,7 @@ docker compose up --build
      Postgres + SQL script + DBeaver
      ```
 
-     
+   - Coordinator Agent & Product QnA Agent & Shopping Cart Agent 多智能体实现![multi-agents-image](D:\ai_projects\agentic_rag\images\multi-agents-image.png)
 
    
 

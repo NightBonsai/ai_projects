@@ -120,9 +120,7 @@ def submit_feedback(feedback_type=None, feedback_text=""):
 # Session State 初始化： 保存聊天记录
 # 第一次进入网页时初始化
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": "Hello! How can i assist you today?"}
-    ]
+    st.session_state.messages = [{"role": "assistant", "content": "Hello! How can i assist you today?"}]
 
 # 根据历史聊天记录重新渲染聊天窗口 (已弃用，User Feedback 中重新实现)
 # for message in st.session_state.messages:
@@ -132,6 +130,9 @@ if "messages" not in st.session_state:
 # Sidebar 初始化
 if "used_context" not in st.session_state:
     st.session_state.used_context = []
+
+if "shopping_cart" not in st.session_state:                 # Initialize feedback states (simplified)
+    st.session_state.shopping_cart = []
 
 if "latest_feedback" not in st.session_state:               # Initialize feedback states (simplified)
     st.session_state.latest_feedback = None
@@ -145,10 +146,10 @@ if "feedback_submission_status" not in st.session_state:    # Initialize feedbac
 if "trace_id" not in st.session_state:                      # Initialize feedback states (simplified)
     st.session_state.trace_id = None
 
-# Sidebar 显示回答引用的商品推荐信息
+# Sidebar 显示商品推荐信息 & 购物车
 with st.sidebar:
     # Create tabs in the sidebar
-    suggestions_tab, = st.tabs(["Suggestions"])
+    suggestions_tab, shopping_cart_tab = st.tabs(["Suggestions", "Shopping Cart"])
     
     # Suggestions Tab
     with suggestions_tab:
@@ -161,6 +162,20 @@ with st.sidebar:
                 st.divider()
         else:
             st.info("No suggestions yet")
+    
+    # Shopping Cart Tab
+    with shopping_cart_tab:
+        if st.session_state.shopping_cart:
+            for idx, item in enumerate(st.session_state.shopping_cart): # 遍历每一个商品
+                st.caption(item.get('description', 'No description'))        # 商品描述
+                if 'product_image_url' in item:
+                    st.image(item["product_image_url"], width=250)
+                st.caption(f"Price: {item['price']} {item['currency']}")
+                st.caption(f"Quantity: {item['quantity']}")
+                st.caption(f"Total price: {item['total_price']} {item['currency']}")
+                st.divider()
+        else:
+            st.info("Your cart is empty")
 
 
 # User Feedback
@@ -260,7 +275,7 @@ if prompt := st.chat_input("Hello! How can I assist you today?"):
         message_placeholder = st.empty()
         for line in api_call_stream(                    # 调用 FastAPI 后端接口: 流式输出形式
             "post",
-            f"{config.API_URL}/rag",
+            f"{config.API_URL}/agent",
             json={"query": prompt, "thread_id": session_id},    
             stream=True,
             headers={"Accept": "text/event-stream"}
@@ -276,10 +291,12 @@ if prompt := st.chat_input("Hello! How can I assist you today?"):
                         answer = output["data"]["answer"]               # 提取 llm 最终回答
                         used_context = output["data"]["used_context"]   # 提取 llm 从知识库真正引用的商品信息
                         trace_id = output["data"]["trace_id"]
+                        shopping_cart = output["data"]["shopping_cart"]
 
                         st.session_state.used_context = used_context    # 引用知识库信息保存到 Session State，Sidebar 会读取这里的数据
                         st.session_state.messages.append({"role": "assistant", "content": answer})  # 保存 Assistant 回复
                         st.session_state.trace_id = trace_id
+                        st.session_state.shopping_cart = shopping_cart
 
                         st.session_state.latest_feedback = None
                         st.session_state.show_feedback_box = False

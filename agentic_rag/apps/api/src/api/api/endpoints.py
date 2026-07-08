@@ -36,8 +36,8 @@ logger = logging.getLogger(__name__)
 #     )
 
 # 新端口: 流式输出
-rag_router = APIRouter()        # 初始化接口
-@rag_router.post("/")           # 注册接口
+agent_router = APIRouter()      # 初始化接口
+@agent_router.post("/")         # 注册接口
 def rag(                        # 接口处理函数
     request: Request,
     payload: RAGRequest
@@ -69,11 +69,11 @@ def send_feedback(
 # 注册 API 路由，使 FastAPI 知道有哪些后端接口可以向前端提供服务
 # 总接口常规结构
 # api_router
-# ├── rag_router
+# ├── agent_router
 # ├── feedback_router
 # └── ...
 api_router = APIRouter()        
-api_router.include_router(rag_router, prefix="/rag", tags=["rag"])                          # http://localhost:8000/rag/ 
+api_router.include_router(agent_router, prefix="/agent", tags=["agent"])                    # http://localhost:8000/agent/ 
 api_router.include_router(feedback_router, prefix="/submit_feedback", tags=["feedback"])    # http://localhost:8000/submit_feedback/
 
 

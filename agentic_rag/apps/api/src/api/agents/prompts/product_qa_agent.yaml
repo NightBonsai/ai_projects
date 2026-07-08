@@ -1,11 +1,11 @@
 metadata:
-  name: Amazon QnA Agent Prompt
+  name: Amazon product QnA Agent Prompt
   version: 1.0.0
-  description: Amazon QnA Agent Prompt for Amazon Items RAG Pipeline
+  description: Amazon product QnA Agent Prompt for Amazon Items RAG Pipeline
   author: hyh
 
 prompts:
-  qa_agent: |
+  product_qa_agent: |
 
     you are a shopping assistant that can answer questions about the products in stock.
 

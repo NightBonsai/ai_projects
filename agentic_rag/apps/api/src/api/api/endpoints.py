@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # 新端口: 流式输出
 agent_router = APIRouter()      # 初始化接口
 @agent_router.post("/")         # 注册接口
-def rag(                        # 接口处理函数
+def agent(                      # 接口处理函数
     request: Request,
     payload: RAGRequest
 ) -> StreamingResponse:         # 流式输出

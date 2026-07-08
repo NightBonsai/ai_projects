@@ -1,6 +1,4 @@
-# ai_projects
-
-
+# Amazon Shopping Assistant
 
 ### 开发环境
 
@@ -45,21 +43,13 @@ docker compose up --build
 
 ### 环境搭建
 
-1. 安装 Python 3.12 or 3.14
+1. 安装 [Python](https://www.python.org/) (3.12 或 3.14)
 
-   [Python ]: https://www.python.org/
+2. 安装 [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
-2. 安装 uv
+3. 安装 [cursor IDE](https://cursor.com/)
 
-   [UV ]: https://docs.astral.sh/uv/getting-started/installation/
-
-3. 安装 cursor IDE
-
-   [Cursor IDE]: https://cursor.com/
-
-4. 安装 Docker Desktop 并运行
-
-   [Docker Desktop]: https://www.docker.com/
+4. 安装 [Docker Desktop](https://www.docker.com/) 并运行
 
 5. 安装指定项目虚拟环境 
 
@@ -155,7 +145,7 @@ docker compose up --build
      LangGraph: 用户意图识别 + 用户查询重写 + ReAct-Style Tool Calling
      ```
 
-     ![multi-turn-agent-image](.\agentic_rag\images\multi-turn-agent-image.png)
+     ![multi-turn-agent-image](./agentic_rag/images/multi-turn-agent-image.png)
 
    - 多轮对话实现
 
@@ -191,7 +181,7 @@ docker compose up --build
 
      
 
-   ![multi-agents-image](.\agentic_rag\images\multi-agents-image.png)
+   ![multi-agents-image](./agentic_rag/images/multi-agents-image.png)
 
    
 

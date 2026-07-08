@@ -1,14 +1,6 @@
-# FastAPI
+# Amazon Shopping Assistant
 
-封装后端服务，给前端提供 HTTP  通信接口；高并发，支持异步
-
-接收请求 → 处理逻辑 → 调用大模型 → 返回结果
-
-------
-
-
-
-# Agentic_RAG
+## Agentic_RAG
 
 实现 检索 Retrieval + 增强 Augmented + 生成 Generation 的固定 Pipeline Chain 流程 
 
@@ -17,6 +9,24 @@
 ```
 LLM 负责决策，Tool 负责执行，Graph 负责控制整个流程
 ```
+
+实现 基于  Coordinator + Specialist Agents 的 Multi-Agent 协同 Agentic RAG 架构
+
+```
+Coordinator Agent
+        ├── Product QA Agent
+        └── Shopping Cart Agent
+```
+
+------
+
+
+
+## FastAPI
+
+封装后端服务，给前端提供 HTTP  通信接口；高并发，支持异步
+
+接收请求 → 处理逻辑 → 调用大模型 → 返回结果
 
 ------
 

@@ -155,6 +155,8 @@ docker compose up --build
      LangGraph: 用户意图识别 + 用户查询重写 + ReAct-Style Tool Calling
      ```
 
+     ![multi-turn-agent-image](.\agentic_rag\images\multi-turn-agent-image.png)
+
    - 多轮对话实现
 
      ```
@@ -181,7 +183,15 @@ docker compose up --build
      Postgres + SQL script + DBeaver
      ```
 
-   - Coordinator Agent & Product QnA Agent & Shopping Cart Agent 多智能体实现![multi-agents-image](D:\ai_projects\agentic_rag\images\multi-agents-image.png)
+   - 重构 单智能体架构 为 多智能体架构
+
+     ```
+     Coordinator Agent & Product QnA Agent & Shopping Cart Agent 
+     ```
+
+     
+
+   ![multi-agents-image](.\agentic_rag\images\multi-agents-image.png)
 
    
 

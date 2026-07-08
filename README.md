@@ -179,9 +179,8 @@ docker compose up --build
      Coordinator Agent & Product QnA Agent & Shopping Cart Agent 
      ```
 
-     
-
-   ![multi-agents-image](./agentic_rag/images/multi-agents-image.png)
-
+     ![multi-agents-image](./agentic_rag/images/multi-agents-image.png)
+  
    
+
 

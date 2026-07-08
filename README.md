@@ -110,9 +110,9 @@ docker compose up --build
 1. 项目原型构建: 
    - Streamlit 前端 
    - FastAPI 后端
-   
+
 2. RAG 流程实现：
-   
+
    - 数据集获取 & 提取
    - Qdrant 向量数据库部署
    - 数据集 Embedding 处理 & 存入数据库
@@ -120,29 +120,29 @@ docker compose up --build
    - LangSmith 可观测 debug 平台部署
    - 测试集生成 & 存入数据库
    - RAG 评估
-   
+
      ```
      ragas (old version have issues)
      ```
    - 结构化输出实现
-   
+
      ```
      Pydantic + Instructor
      ```
    - 混合检索实现
-   
+
      ```
      Embedding 相似度 + bm25 关键词检索 
      ```
-   
+
    - 混合检索结果重新排列
-   
+
      ```
      Cohere / Qwen Rerank / BGE Reranker
      ```
-   
+
    - Prompt 管理实现
-   
+
      ```
      jinja2
      ```
@@ -156,28 +156,32 @@ docker compose up --build
      ```
 
    - 多轮对话实现
-   
+
      ```
      PostgresSQL 数据库: 存储 Agent 运行状态 & Checkpoint 聊天历史
      ```
-   
+
    - 商品评论数据集写入 Qdrant & 商品查询查询 Tool 实现
-   
+
    - 接收用户反馈功能实现
-   
+
    - MCP 封装 Tools (未实现)
-   
+
    - Agent 工作流状态 流式输出功能 实现
-   
+
      ```
      SSE (Server-Sent Events)
      ```
-   
+
+4. Multi-Agent 系统实现：
+
    - 购物车数据库初始化 & 数据库增删改查工具实现
-   
+
      ```
      Postgres + SQL script + DBeaver
      ```
-   
+
      
+
+   
 

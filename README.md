@@ -184,7 +184,7 @@ docker compose up --build
    - 购物车数据库初始化 & 数据库增删改查工具实现
 
      ```
-     Postgres + SQL script + DBeaver
+     Postgres SQL + DBeaver 数据库可视化工具
      ```
 
    - 重构 单智能体架构 为 多智能体架构
@@ -196,4 +196,11 @@ docker compose up --build
      ![multi-agents-image](./agentic_rag/images/multi-agents-image.png)
    
    
-
+   
+   - 商品仓库&库存数据库初始化 & 库存查询/预留工具实现
+   
+     ```
+     Postgres SQL + DBeaver 数据库可视化工具
+     ```
+   
+     

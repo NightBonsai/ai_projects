@@ -1,3 +1,5 @@
+DROP SCHEMA IF EXISTS shopping_carts CASCADE;
+
 CREATE SCHEMA IF NOT EXISTS shopping_carts;
 
 CREATE TABLE shopping_carts.shopping_cart_items (

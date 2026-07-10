@@ -137,9 +137,9 @@ def parse_docstring_params(docstring: str) -> Dict[str, str]:
             in_params = False
         elif in_params:
             # Parse parameter line (handles "param: desc" and "- param: desc" formats)
-            if ":" in stripped and (stripped[0].isalpha() or stripped.startswith(['-', '+'])):
+            if ":" in stripped and (stripped[0].isalpha() or stripped.startswith(('-', '+'))):
                 param_name = stripped.lstrip('- *').split(':')[0].strip()
-                param_desc = ":".join(stripped.lstrip('-*').split(':')[1:]).strip()
+                param_desc = ":".join(stripped.lstrip('- *').split(':')[1:]).strip()
                 params[param_name] = param_desc
                 current_param = param_name
             elif current_param and stripped:

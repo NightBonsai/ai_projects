@@ -10,12 +10,13 @@
 LLM 负责决策，Tool 负责执行，Graph 负责控制整个流程
 ```
 
-实现 基于  Coordinator + Specialist Agents 的 Multi-Agent 协同 Agentic RAG 架构
+实现 基于 Coordinator + Specialist Agents 的 Multi-Agent 协同 Agentic RAG 架构
 
 ```
 Coordinator Agent
         ├── Product QA Agent
-        └── Shopping Cart Agent
+        ├── Shopping Cart Agent
+        └── Warehouse Manager Agent
 ```
 
 ------
@@ -85,11 +86,11 @@ Streamlit UI
     ↓
 POST /agent/
     ↓
-agent()                 ← 自定义 FastAPI 接口函数
+agent()                 	← 自定义 FastAPI 接口函数
     ↓
-rag_agent_stream_wrapper()
+rag_agent_stream_wrapper() 	← Agentic RAG 流程封装函数
     ↓
-for chunk in graph.stream(initial_state, config=..., stream_mode=[...]) 
+for chunk in graph.stream(initial_state, config=..., stream_mode=[...])	← 流式输出
     ↓
 LangGraph Workflow
 ```
@@ -98,11 +99,12 @@ prompts/*				存储 Prompts
 
 ```
 prompts	
-	├── coordinator_agent.yaml		# 用户意图识别 & 多智能体协调 Agent Prompt
-    ├── product_qa_agent.yaml		# 商品查询 Agent Prompt
-    ├── shopping_cart_agent.yaml	# 购物车操作 Agent Prompt
-    ├── intent_router_agent.yaml	# 用户意图识别节点 Prompt (已弃用)
-    └── retrieval_generation.yaml	# RAG 固定流程脚本使用的 Prompt (已弃用)
+	├── coordinator_agent.yaml			# 用户意图识别 & 多智能体协调 Agent Prompt
+    ├── product_qa_agent.yaml			# 商品查询 Agent Prompt
+    ├── shopping_cart_agent.yaml		# 购物车操作 Agent Prompt
+    ├── warehouse_manager_agent.yaml	# 库存操作 Agent Prompt
+    ├── intent_router_agent.yaml		# 用户意图识别节点 Prompt (已弃用)
+    └── retrieval_generation.yaml		# RAG 固定流程脚本使用的 Prompt (已弃用)
 ```
 
 utils/*					存储功能函数
@@ -123,7 +125,7 @@ endpoints.py:	定义 FastAPI 调用的真正的接口
 ```
 api_router				# 主接口
     ├── agent_router	# 子接口
-    ├── xxx_router
+    ├── feedback_router
     └── ...
 ```
 

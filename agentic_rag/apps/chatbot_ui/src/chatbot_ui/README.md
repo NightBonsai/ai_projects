@@ -10,12 +10,13 @@
 LLM 负责决策，Tool 负责执行，Graph 负责控制整个流程
 ```
 
-实现 基于  Coordinator + Specialist Agents 的 Multi-Agent 协同 Agentic RAG 架构
+实现 基于 Coordinator + Specialist Agents 的 Multi-Agent 协同 Agentic RAG 架构
 
 ```
 Coordinator Agent
         ├── Product QA Agent
-        └── Shopping Cart Agent
+        ├── Shopping Cart Agent
+        └── Warehouse Manager Agent
 ```
 
 ------

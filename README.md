@@ -190,10 +190,10 @@ docker compose up --build
    - 重构 单智能体架构 为 多智能体架构
 
      ```
-     Coordinator Agent & Product QnA Agent & Shopping Cart Agent 
+     Coordinator Agent + (Product QnA Agent / Shopping Cart Agent)
      ```
 
-     ![multi-agents-image](./agentic_rag/images/multi-agents-image.png)
+     ![multi-agents-image](./agentic_rag/images/multi-agents-image-1.0.png)
    
    
    
@@ -203,4 +203,10 @@ docker compose up --build
      Postgres SQL + DBeaver 数据库可视化工具
      ```
    
-     
+   - 多智能体架构升级
+   
+     ```
+     Coordinator Agent + (Product QnA Agent / Shopping Cart Agent / Warehouse Manager Agent )
+     ```
+   
+     ![multi-agents-image](./agentic_rag/images/multi-agents-image-2.0.png)

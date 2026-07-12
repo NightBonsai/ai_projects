@@ -30,7 +30,6 @@ class CoordinatorAgentResponse(BaseModel):
     final_answer: bool = False
     answer: str = ""
 
-
 ### Coordinator Agent Node ###
 # LangGraph Workflow Node
 @traceable(
@@ -86,7 +85,7 @@ def coordinator_agent(state) -> dict:
             "next_agent": response.next_agent,
             "plan": [data.model_dump() for data in response.plan]
         },
-        # "trace_id": trace_id
+        "trace_id": trace_id
     }
 
 
@@ -106,7 +105,6 @@ class ProductQAAgentResponse(BaseModel):
     references: List[RAGUsedContext] = Field(description="List of items used to answer the question.")
     final_answer: bool = False
     tool_calls: List[ToolCall] = []
-
 
 ### Product QnA Agent Node ###
 # LangGraph Workflow Node
@@ -170,7 +168,6 @@ class ShoppingCartAgentResponse(BaseModel):
     final_answer: bool = False
     tool_calls: List[ToolCall] = []
 
-
 ### Shopping Cart Agent Node ###
 # LangGraph Workflow Node
 @traceable(
@@ -224,4 +221,65 @@ def shopping_cart_agent(state) -> dict:
         },
         "answer": response.answer,
     }
+
+
+#### Warehouse Manager Agent ####
+### Warehouse Manager Agent Response Model ###
+class WarehouseManagerAgentResponse(BaseModel):
+    answer: str= Field(description="Answer to the question.")
+    final_answer: bool = False
+    tool_calls: List[ToolCall] = []
+
+### Warehouse Manager Agent Node ###
+# LangGraph Workflow Node
+@traceable(
+    name="warehouse_manager_agent",
+    run_type="llm",
+    metadata={"ls_provider": "openai", "ls_model_name": "gpt-4.1"}
+)
+def warehouse_manager_agent(state) -> dict:
+    
+    # 获取 Prompt
+    template = prompt_template_config("api/agents/prompts/warehouse_manager_agent.yaml", "warehouse_manager_agent")       
+    prompt = template.render(
+        available_tools=state.warehouse_manager_agent.available_tools,
+    )
+
+    # 获取当前 Conversation 
+    conversation = []
+    messages = state.messages
+    for message in messages:
+        conversation.append(convert_to_openai_messages(message))
+    
+    # LLM 根据 Prompt 思考
+    # 是否调用 Tool or 是否已经得到最终答案
+    client = instructor.from_openai(OpenAI())
+    response, raw_response = client.chat.completions.create_with_completion(
+        model="gpt-4.1",
+        response_model=WarehouseManagerAgentResponse,
+        messages=[{"role": "system", "content": prompt}, *conversation],
+        temperature=0
+    )
+    ai_message = format_ai_message(response)        # 将 Instructor 输出转换为 LangChain AIMessage
+
+    # LangSmith 记录 Token 使用情况
+    current_run = get_current_run_tree()
+    if current_run:
+        current_run.metadata["usage_metadata"] = {
+            "input_tokens": raw_response.usage.prompt_tokens,
+            "output_tokens": raw_response.usage.completion_tokens,
+            "total_tokens": raw_response.usage.total_tokens
+        }
+
+    return {
+        "messages": [ai_message],
+        "warehouse_manager_agent":{
+            "tool_calls": [tool_call.model_dump() for tool_call in response.tool_calls],
+            "iteration": state.warehouse_manager_agent.iteration + 1,
+            "final_answer": response.final_answer,
+            "available_tools": state.warehouse_manager_agent.available_tools
+        },
+        "answer": response.answer,
+    }
+
 

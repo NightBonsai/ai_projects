@@ -13,10 +13,13 @@ from typing import Dict, Any, Annotated, List
 from operator import add
 import json
 
-from api.agents.agents import coordinator_agent, product_qa_agent, shopping_cart_agent
+from api.agents.agents import coordinator_agent, product_qa_agent, shopping_cart_agent, warehouse_manager_agent
 from api.agents.agents import ToolCall, Delegation, RAGUsedContext
-from api.agents.tools import get_formatted_items_context, get_formatted_reviews_context
-from api.agents.tools import add_to_shopping_cart, remove_from_cart, get_shopping_cart
+from api.agents.tools import (
+    get_formatted_items_context, get_formatted_reviews_context, 
+    add_to_shopping_cart, remove_from_cart, get_shopping_cart, 
+    check_warehouse_availability, reserve_warehouse_items
+)
 from api.agents.utils.utils import get_tool_descriptions
 
 
@@ -43,11 +46,12 @@ class State(BaseModel):
     coordinator_agent: CoordinatorAgentProperties = Field(default_factory=AgentProperties)
     product_qa_agent: AgentProperties = Field(default_factory=AgentProperties)
     shopping_cart_agent: AgentProperties = Field(default_factory=AgentProperties)
+    warehouse_manager_agent: AgentProperties = Field(default_factory=AgentProperties)
     answer: str = ""                                                                            # 当前 Agent 生成回答
     references: Annotated[List[RAGUsedContext], add] = []                                       # 回答引用的商品
     user_id: str = ""
     cart_id: str = ""
-    # trace_id: str = ""                                      # 一轮对话的 LangSmith Trace ID
+    trace_id: str = ""                                      # 一轮对话的 LangSmith Trace ID
 
 
 ### Edges ###
@@ -57,10 +61,12 @@ def coordinator_agent_edge(state):
         return "end"
     elif state.coordinator_agent.iteration> 3:                              # 是否超过最大循环次数
         return "end"
-    elif state.coordinator_agent.next_agent == "product_qa_agent":          # 用户意图为商品信息检索 product_qa_agent
+    elif state.coordinator_agent.next_agent == "product_qa_agent":          # 用户需要商品信息检索 product_qa_agent
         return "product_qa_agent"
-    elif state.coordinator_agent.next_agent == "shopping_cart_agent":       # 用户意图为购物车增删改 shopping_cart_agent
+    elif state.coordinator_agent.next_agent == "shopping_cart_agent":       # 用户需要购物车增删改 shopping_cart_agent
         return "shopping_cart_agent"
+    elif state.coordinator_agent.next_agent == "warehouse_manager_agent":   # 用户需要查询 or 预留库存 warehouse_manager_agent
+        return "warehouse_manager_agent"
     else:
         return "end"
 
@@ -88,6 +94,18 @@ def shopping_cart_agent_tool_router(state) -> str:
     else:
         return "end"
 
+def warehouse_manager_agent_tool_router(state) -> str:
+    """Decide whether to continue or end."""
+    
+    if state.warehouse_manager_agent.final_answer:          # 是否为最终回答
+        return "end"
+    elif state.warehouse_manager_agent.iteration > 2:       # 是否超过最大循环次数
+        return "end"
+    elif len(state.warehouse_manager_agent.tool_calls) > 0: # Agent 请求调用 Tool
+        return "tools"
+    else:
+        return "end"
+
 
 ### Workflow ###
 workflow = StateGraph(State)
@@ -100,12 +118,18 @@ shopping_cart_agent_tools = [add_to_shopping_cart, remove_from_cart, get_shoppin
 shopping_cart_agent_tool_node = ToolNode(shopping_cart_agent_tools)
 shopping_cart_agent_tool_descriptions = get_tool_descriptions(shopping_cart_agent_tools)
 
+warehouse_manager_agent_tools = [check_warehouse_availability, reserve_warehouse_items]
+warehouse_manager_agent_tool_node = ToolNode(warehouse_manager_agent_tools)
+warehouse_manager_agent_tool_descriptions = get_tool_descriptions(warehouse_manager_agent_tools)
+
 workflow.add_node("coordinator_agent", coordinator_agent)
 workflow.add_node("product_qa_agent", product_qa_agent)
 workflow.add_node("shopping_cart_agent", shopping_cart_agent)
+workflow.add_node("warehouse_manager_agent", warehouse_manager_agent)
 
 workflow.add_node("product_qa_agent_tool_node", product_qa_agent_tool_node)
 workflow.add_node("shopping_cart_agent_tool_node", shopping_cart_agent_tool_node)
+workflow.add_node("warehouse_manager_agent_tool_node", warehouse_manager_agent_tool_node)
 
 workflow.add_edge(START, "coordinator_agent")
 workflow.add_conditional_edges(
@@ -114,6 +138,7 @@ workflow.add_conditional_edges(
     {
         "product_qa_agent": "product_qa_agent",
         "shopping_cart_agent": "shopping_cart_agent",
+        "warehouse_manager_agent": "warehouse_manager_agent",
         "end": END
     }    
 )
@@ -133,8 +158,17 @@ workflow.add_conditional_edges(
         "end": "coordinator_agent"
     }    
 )
+workflow.add_conditional_edges(
+    "warehouse_manager_agent",
+    warehouse_manager_agent_tool_router,
+    {
+        "tools": "warehouse_manager_agent_tool_node",
+        "end": "coordinator_agent"
+    }    
+)
 workflow.add_edge("product_qa_agent_tool_node", "product_qa_agent")
 workflow.add_edge("shopping_cart_agent_tool_node", "shopping_cart_agent")
+workflow.add_edge("warehouse_manager_agent_tool_node", "warehouse_manager_agent")
 
 graph = workflow.compile()
 
@@ -188,6 +222,12 @@ def rag_agent_stream_wrapper(question: str, thread_id: str):
             "iteration": 0,
             "final_answer": False,
             "available_tools": shopping_cart_agent_tool_descriptions,
+            "tool_calls": []
+        },
+        "warehouse_manager_agent": {
+            "iteration": 0,
+            "final_answer": False,
+            "available_tools": warehouse_manager_agent_tool_descriptions,
             "tool_calls": []
         },
         "coordinator_agent": {

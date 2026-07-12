@@ -8,7 +8,7 @@
 
 ### agentic_rag (Amazon Shopping Assistant)
 
-基于 Coordinator + Specialist Agents 的 Multi-Agent 协同 Agentic RAG 架构的 Amazon 网购智能助手
+基于 Coordinator + Specialist Agents 多智能体协同 ReAct 架构的 Amazon 网购智能助手
 
 ------
 

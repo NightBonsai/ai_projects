@@ -210,3 +210,13 @@ docker compose up --build
      ```
    
      ![multi-agents-image](./agentic_rag/images/multi-agents-image-2.0.png)
+
+5. LLMOps
+
+   - 引入多个 LLM APIs，提高系统健壮性
+
+     ```
+     LiteLLM
+     ```
+
+     

@@ -23,6 +23,7 @@ members = [
 [dependency-groups]
 dev = [
     "cohere>=7.0.4",
+    "fastapi>=0.137.2",
     "fastembed>=0.8.0",
     "fastmcp>=3.4.3",
     "langchain-community==0.4.1",
@@ -30,6 +31,7 @@ dev = [
     "langgraph-checkpoint-postgres>=3.0.5",
     "langgraph-prebuilt==1.0.5",
     "langsmith>=0.9.1",
+    "litellm>=1.92.0",
     "matplotlib>=3.11.0",
     "psycopg-binary>=3.3.4",
     "psycopg2-binary>=2.9.12",

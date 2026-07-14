@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List
+from litellm import completion
 
 from langsmith import traceable, get_current_run_tree
 
@@ -37,12 +38,13 @@ class CoordinatorAgentResponse(BaseModel):
     run_type="llm",
     metadata={"ls_provider": "openai", "ls_model_name": "gpt-4.1"}
 )
-def coordinator_agent(state) -> dict:
-
-    # 获取 Prompt
-    template = prompt_template_config("api/agents/prompts/coordinator_agent.yaml", "coordinator_agent")  
-    prompt = template.render()
+def coordinator_agent(state, models=["gpt-4.1", "groq/llama-3.3-70b-versatile"]) -> dict:
     
+    # 获取 Prompt: 多个 LLM API, 不同 LLM 对应不同 prompt
+    prompts = {}
+    for model in models:
+        prompts[model] = prompt_template_config("api/agents/prompts/coordinator_agent.yaml", model).render()
+
     # 获取当前 Conversation 
     conversation = []
     messages = state.messages
@@ -51,13 +53,20 @@ def coordinator_agent(state) -> dict:
 
     # LLM 根据 Prompt 思考
     # 是否调用 Tool or 是否已经得到最终答案
-    client = instructor.from_openai(OpenAI())
-    response, raw_response = client.chat.completions.create_with_completion(
-        model="gpt-4.1",
-        response_model=CoordinatorAgentResponse,
-        messages=[{"role": "system", "content": prompt}, *conversation],
-        temperature=0,
-    )
+    # 多个 LLM API, 一个 LLM API 调用失败后尝试调用备用 LLM API
+    client = instructor.from_litellm(completion)
+    for model in models:
+        try:
+            response, raw_response = client.chat.completions.create_with_completion(
+                model=model,
+                response_model=CoordinatorAgentResponse,
+                messages=[{"role": "system", "content": prompts[model]}, *conversation],
+                temperature=0,
+            )
+            break
+        except Exception as e:
+            print(f"Error with model {model}: {e}")
+            continue
     
     # LangSmith 记录 Token 使用情况 & 当前对话 Trace ID
     current_run = get_current_run_tree()
@@ -113,13 +122,14 @@ class ProductQAAgentResponse(BaseModel):
     run_type="llm",
     metadata={"ls_provider": "openai", "ls_model_name": "gpt-4.1"}
 )
-def product_qa_agent(state) -> dict:
+def product_qa_agent(state, models=["gpt-4.1", "groq/llama-3.3-70b-versatile"]) -> dict:
 
-    # 获取 Prompt
-    template = prompt_template_config("api/agents/prompts/product_qa_agent.yaml", "product_qa_agent")
-    prompt = template.render(
-        available_tools=state.product_qa_agent.available_tools
-    )
+    # 获取 Prompt: 多个 LLM API, 不同 LLM 对应不同 prompt
+    prompts = {}
+    for model in models:
+        prompts[model] = prompt_template_config("api/agents/prompts/product_qa_agent.yaml", model).render(
+            available_tools=state.product_qa_agent.available_tools
+        )
 
     # 获取当前 Conversation 
     conversation = []
@@ -129,13 +139,21 @@ def product_qa_agent(state) -> dict:
     
     # LLM 根据 Prompt 思考
     # 是否调用 Tool or 是否已经得到最终答案
-    client = instructor.from_openai(OpenAI())
-    response, raw_response = client.chat.completions.create_with_completion(
-        model="gpt-4.1",
-        response_model=ProductQAAgentResponse,
-        messages=[{"role": "system", "content": prompt}, *conversation],
-        temperature=0
-    )
+    # 多个 LLM API, 一个 LLM API 调用失败后尝试调用备用 LLM API
+    client = instructor.from_litellm(completion)
+    for model in models:
+        try:
+            response, raw_response = client.chat.completions.create_with_completion(
+                model=model,
+                response_model=ProductQAAgentResponse,
+                messages=[{"role": "system", "content": prompts[model]}, *conversation],
+                temperature=0,
+            )
+            break
+        except Exception as e:
+            print(f"Error with model {model}: {e}")
+            continue
+    
     ai_message = format_ai_message(response)        # 将 Instructor 输出转换为 LangChain AIMessage
 
     # LangSmith 记录 Token 使用情况
@@ -175,15 +193,16 @@ class ShoppingCartAgentResponse(BaseModel):
     run_type="llm",
     metadata={"ls_provider": "openai", "ls_model_name": "gpt-4.1"}
 )
-def shopping_cart_agent(state) -> dict:
+def shopping_cart_agent(state, models=["gpt-4.1", "groq/llama-3.3-70b-versatile"]) -> dict:
     
-    # 获取 Prompt
-    template = prompt_template_config("api/agents/prompts/shopping_cart_agent.yaml", "shopping_cart_agent")    
-    prompt = template.render(
-        available_tools=state.shopping_cart_agent.available_tools,
-        user_id=state.user_id,
-        cart_id=state.cart_id
-    )
+    # 获取 Prompt: 多个 LLM API, 不同 LLM 对应不同 prompt
+    prompts = {}
+    for model in models:
+        prompts[model] = prompt_template_config("api/agents/prompts/shopping_cart_agent.yaml", model).render(
+            available_tools=state.shopping_cart_agent.available_tools,
+            user_id=state.user_id,
+            cart_id=state.cart_id
+        )
 
     # 获取当前 Conversation 
     conversation = []
@@ -193,13 +212,21 @@ def shopping_cart_agent(state) -> dict:
     
     # LLM 根据 Prompt 思考
     # 是否调用 Tool or 是否已经得到最终答案
-    client = instructor.from_openai(OpenAI())
-    response, raw_response = client.chat.completions.create_with_completion(
-        model="gpt-4.1",
-        response_model=ShoppingCartAgentResponse,
-        messages=[{"role": "system", "content": prompt}, *conversation],
-        temperature=0
-    )
+    # 多个 LLM API, 一个 LLM API 调用失败后尝试调用备用 LLM API
+    client = instructor.from_litellm(completion)
+    for model in models:
+        try:
+            response, raw_response = client.chat.completions.create_with_completion(
+                model=model,
+                response_model=ShoppingCartAgentResponse,
+                messages=[{"role": "system", "content": prompts[model]}, *conversation],
+                temperature=0,
+            )
+            break
+        except Exception as e:
+            print(f"Error with model {model}: {e}")
+            continue
+
     ai_message = format_ai_message(response)        # 将 Instructor 输出转换为 LangChain AIMessage
 
     # LangSmith 记录 Token 使用情况
@@ -237,13 +264,14 @@ class WarehouseManagerAgentResponse(BaseModel):
     run_type="llm",
     metadata={"ls_provider": "openai", "ls_model_name": "gpt-4.1"}
 )
-def warehouse_manager_agent(state) -> dict:
+def warehouse_manager_agent(state, models=["gpt-4.1", "groq/llama-3.3-70b-versatile"]) -> dict:
     
-    # 获取 Prompt
-    template = prompt_template_config("api/agents/prompts/warehouse_manager_agent.yaml", "warehouse_manager_agent")       
-    prompt = template.render(
-        available_tools=state.warehouse_manager_agent.available_tools,
-    )
+    # 获取 Prompt: 多个 LLM API, 不同 LLM 对应不同 prompt
+    prompts = {}
+    for model in models:
+        prompts[model] = prompt_template_config("api/agents/prompts/warehouse_manager_agent.yaml", model).render(
+            available_tools=state.warehouse_manager_agent.available_tools,
+        )
 
     # 获取当前 Conversation 
     conversation = []
@@ -253,13 +281,21 @@ def warehouse_manager_agent(state) -> dict:
     
     # LLM 根据 Prompt 思考
     # 是否调用 Tool or 是否已经得到最终答案
-    client = instructor.from_openai(OpenAI())
-    response, raw_response = client.chat.completions.create_with_completion(
-        model="gpt-4.1",
-        response_model=WarehouseManagerAgentResponse,
-        messages=[{"role": "system", "content": prompt}, *conversation],
-        temperature=0
-    )
+    # 多个 LLM API, 一个 LLM API 调用失败后尝试调用备用 LLM API
+    client = instructor.from_litellm(completion)
+    for model in models:
+        try:
+            response, raw_response = client.chat.completions.create_with_completion(
+                model=model,
+                response_model=WarehouseManagerAgentResponse,
+                messages=[{"role": "system", "content": prompts[model]}, *conversation],
+                temperature=0,
+            )
+            break
+        except Exception as e:
+            print(f"Error with model {model}: {e}")
+            continue
+
     ai_message = format_ai_message(response)        # 将 Instructor 输出转换为 LangChain AIMessage
 
     # LangSmith 记录 Token 使用情况
@@ -281,5 +317,4 @@ def warehouse_manager_agent(state) -> dict:
         },
         "answer": response.answer,
     }
-
 

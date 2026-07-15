@@ -213,6 +213,8 @@ docker compose up --build
 
    - Google Agent Development Kit 尝试 **(可选)** **(未实现)**
 
+   - A2A 协议尝试 **(可选)** **(未实现)**
+
 5. LLMOps
 
    - 引入多个 LLM APIs，提高系统健壮性

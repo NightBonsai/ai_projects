@@ -171,7 +171,7 @@ docker compose up --build
 
    - 接收用户反馈功能实现
 
-   - MCP 封装 Tools (未实现)
+   - MCP 封装 Tools **(未实现)**
 
    - Agent 工作流状态 流式输出功能 实现
 
@@ -194,22 +194,24 @@ docker compose up --build
      ```
 
      ![multi-agents-image](./agentic_rag/images/multi-agents-image-1.0.png)
+
    
-   
-   
+
    - 商品仓库&库存数据库初始化 & 库存查询/预留工具实现
-   
+
      ```
      Postgres SQL + DBeaver 数据库可视化工具
      ```
-   
+
    - 多智能体架构升级
-   
+
      ```
      Coordinator Agent + (Product QnA Agent / Shopping Cart Agent / Warehouse Manager Agent )
      ```
-   
+
      ![multi-agents-image](./agentic_rag/images/multi-agents-image-2.0.png)
+
+   - Google Agent Development Kit 尝试 **(可选)** **(未实现)**
 
 5. LLMOps
 

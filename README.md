@@ -20,7 +20,7 @@ Windows11
 
 Python 3.12 or 3.14
 
-uv python包管理器
+uv python 包管理器
 
 cursor IDE
 
@@ -123,7 +123,7 @@ docker compose up --build
    - RAG 流程实现
    - LangSmith 可观测 debug 平台部署
    - 测试集生成 & 存入数据库
-   - RAG 评估
+   - RAG 评估 **(未实现)**
 
      ```
      ragas (old version have issues)
@@ -223,4 +223,10 @@ docker compose up --build
      LiteLLM
      ```
 
+   - Prompt Caching 日志实现
+   
+     ```
+     LangSmith
+     ```
+   
      

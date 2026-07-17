@@ -6,12 +6,18 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 
 from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 from langgraph.checkpoint.postgres import PostgresSaver
 
 from typing import Dict, Any, Annotated, List
 from operator import add
 import json
+
+from langsmith import traceable
+from langgraph.types import Command, interrupt
+from langchain_core.messages import AIMessage
+from typing import Literal
 
 from api.agents.agents import coordinator_agent, product_qa_agent, shopping_cart_agent, warehouse_manager_agent
 from api.agents.agents import ToolCall, Delegation, RAGUsedContext
@@ -41,7 +47,7 @@ class AgentProperties(BaseModel):
     final_answer: bool = False                              # 是否结束 or 继续循环生成答案
 
 class State(BaseModel):
-    messages: Annotated[List[Any], add] = []                                                    # 对话历史: HumanMessage、AIMessage、ToolMessage
+    messages: Annotated[List[Any], add_messages] = []                                           # 对话历史: HumanMessage、AIMessage、ToolMessage
     user_intent: str = ""                                                                       # 用户意图: 问题是否属于商品领域
     coordinator_agent: CoordinatorAgentProperties = Field(default_factory=AgentProperties)
     product_qa_agent: AgentProperties = Field(default_factory=AgentProperties)
@@ -52,6 +58,43 @@ class State(BaseModel):
     user_id: str = ""
     cart_id: str = ""
     trace_id: str = ""                                      # 一轮对话的 LangSmith Trace ID
+
+
+### HITL Node ###
+# Human In The Loop: 用户确认是否需要将物品添加进购物车
+@traceable(
+    name="hitl_add_to_cart"
+)
+def hitl_add_to_cart(state) -> Command[Literal["shopping_cart_agent_tool_node", END]]:
+    
+    for tool_call in state.shopping_cart_agent.tool_calls:
+        if tool_call.name == "add_to_shopping_cart":
+            items_to_add = tool_call.arguments["items"]
+            break
+
+    human_input = interrupt({
+        "items_to_add": items_to_add
+    })
+
+    if human_input.get("confirmed"):
+        return Command(
+            update={},
+            goto="shopping_cart_agent_tool_node"
+        )
+    else:
+        last_msg = state.messages[-1]
+        sanitized = AIMessage(
+            content=last_msg.content,
+            id=last_msg.id,     # same id = replace instead of append
+        )
+
+        return Command(
+            update={
+                "messages": [sanitized],
+                "answer": "You have rejected the addition of items to the cart."
+            }, 
+            goto=END
+        )
 
 
 ### Edges ###
@@ -70,7 +113,7 @@ def coordinator_agent_edge(state):
     else:
         return "end"
 
-def product_qa_agent_tool_router(state) -> str:
+def product_qa_agent_tool_edge(state) -> str:
     """Decide whether to continue or end."""
     
     if state.product_qa_agent.final_answer:             # 是否为最终回答
@@ -82,19 +125,28 @@ def product_qa_agent_tool_router(state) -> str:
     else:
         return "end"
 
-def shopping_cart_agent_tool_router(state) -> str:
+def shopping_cart_agent_tool_edge(state) -> str:
     """Decide whether to continue or end."""
     
+    add_to_cart_tool_call = False
+    for tool_call in state.shopping_cart_agent.tool_calls:
+        if tool_call.name == "add_to_shopping_cart":
+            add_to_cart_tool_call = True
+        break
+
     if state.shopping_cart_agent.final_answer:          # 是否为最终回答
         return "end"
     elif state.shopping_cart_agent.iteration > 2:       # 是否超过最大循环次数
         return "end"
     elif len(state.shopping_cart_agent.tool_calls) > 0: # Agent 请求调用 Tool
-        return "tools"
+        if add_to_cart_tool_call:
+            return "hitl_add_to_cart"
+        else:
+            return "tools"
     else:
         return "end"
 
-def warehouse_manager_agent_tool_router(state) -> str:
+def warehouse_manager_agent_tool_edge(state) -> str:
     """Decide whether to continue or end."""
     
     if state.warehouse_manager_agent.final_answer:          # 是否为最终回答
@@ -126,6 +178,7 @@ workflow.add_node("coordinator_agent", coordinator_agent)
 workflow.add_node("product_qa_agent", product_qa_agent)
 workflow.add_node("shopping_cart_agent", shopping_cart_agent)
 workflow.add_node("warehouse_manager_agent", warehouse_manager_agent)
+workflow.add_node("hitl_add_to_cart", hitl_add_to_cart)     # Human In The Loop
 
 workflow.add_node("product_qa_agent_tool_node", product_qa_agent_tool_node)
 workflow.add_node("shopping_cart_agent_tool_node", shopping_cart_agent_tool_node)
@@ -144,7 +197,7 @@ workflow.add_conditional_edges(
 )
 workflow.add_conditional_edges(
     "product_qa_agent",
-    product_qa_agent_tool_router,
+    product_qa_agent_tool_edge,
     {
         "tools": "product_qa_agent_tool_node",
         "end": "coordinator_agent"
@@ -152,15 +205,16 @@ workflow.add_conditional_edges(
 )
 workflow.add_conditional_edges(
     "shopping_cart_agent",
-    shopping_cart_agent_tool_router,
+    shopping_cart_agent_tool_edge,
     {
         "tools": "shopping_cart_agent_tool_node",
+        "hitl_add_to_cart": "hitl_add_to_cart",
         "end": "coordinator_agent"
     }    
 )
 workflow.add_conditional_edges(
     "warehouse_manager_agent",
-    warehouse_manager_agent_tool_router,
+    warehouse_manager_agent_tool_edge,
     {
         "tools": "warehouse_manager_agent_tool_node",
         "end": "coordinator_agent"
@@ -175,12 +229,15 @@ graph = workflow.compile()
 
 ### Agent Execution Function ###
 # 流式输出
-def rag_agent_stream_wrapper(question: str, thread_id: str):
+def rag_agent_stream_wrapper(question, thread_id: str, mode: str):
 
     def _string_for_sse(message: str):
         return f"data: {message}\n\n"
 
     def _process_graph_event(chunk):
+
+        def _is_interrupt(chunk):
+            return len(chunk[1].get('payload', {}).get('interrupts', [])) > 0
 
         def _is_node_start(chunk):
             return chunk[1].get("type") == "task"
@@ -197,46 +254,66 @@ def rag_agent_stream_wrapper(question: str, thread_id: str):
                 return f"Unknown tool: {tool_call.name}."
 
         if _is_node_start(chunk):
-            if chunk[1].get("payload", {}).get("name") == "intent_router_node":
-                return "Analysing the question..."
-            if chunk[1].get("payload", {}).get("name") == "agent_node":
-                return "Planning..."
+            if chunk[1].get("payload", {}).get("name") == "coordinator_agent":
+                return"Planning..."
+            if chunk[1].get("payload", {}).get("name") == "product_qa_agent":
+                return "Fetching information about inventory..."
+            if chunk[1].get("payload", {}).get("name") == "shopping_cart_agent":
+                return "Shopping cart management..."
+            if chunk[1].get("payload", {}).get("name") == "warehouse_manager_agent":
+                return "Warehouse management..."
             if chunk[1].get("payload", {}).get("name") == "tool_node":
-                message = " ".join([_tool_to_text(tool_call) for tool_call in chunk[1].get("payload", {}).get("input", {}).tool_calls])
+                message ="".join([_tool_to_text(tool_call) for tool_call in chunk[1].get('payload',{}).get('input', {}).tool_calls])
                 return message
+        elif _is_interrupt(chunk):
+            value = chunk[1].get('payload', {}).get('interrupts', [])[0].get('value')
+            payload = {
+                "type": "hitl_interrupt",
+                "data": {
+                    "data": value
+                }
+            }
+            return json.dumps(payload)
         else:
-            return False
+            return "Unknown operation..."
     
     # 图状态初始化
-    initial_state = {
-        "messages": [{"role": "user", "content": question}],
-        "user_id": thread_id,
-        "cart_id": thread_id,
-        "product_qa_agent": {
-            "iteration": 0,
-            "final_answer": False,
-            "available_tools": product_qa_agent_tool_descriptions,
-            "tool_calls": []
-        },
-        "shopping_cart_agent": {
-            "iteration": 0,
-            "final_answer": False,
-            "available_tools": shopping_cart_agent_tool_descriptions,
-            "tool_calls": []
-        },
-        "warehouse_manager_agent": {
-            "iteration": 0,
-            "final_answer": False,
-            "available_tools": warehouse_manager_agent_tool_descriptions,
-            "tool_calls": []
-        },
-        "coordinator_agent": {
-            "iteration": 0,
-            "final_answer": False,
-            "plan": [],
-            "next_agent": ""
-        },
-    }
+    if mode == "initialize":
+        initial_state = {
+            "messages": [{"role": "user", "content": question}],
+            "user_id": thread_id,
+            "cart_id": thread_id,
+            "product_qa_agent": {
+                "iteration": 0,
+                "final_answer": False,
+                "available_tools": product_qa_agent_tool_descriptions,
+                "tool_calls": []
+            },
+            "shopping_cart_agent": {
+                "iteration": 0,
+                "final_answer": False,
+                "available_tools": shopping_cart_agent_tool_descriptions,
+                "tool_calls": []
+            },
+            "warehouse_manager_agent": {
+                "iteration": 0,
+                "final_answer": False,
+                "available_tools": warehouse_manager_agent_tool_descriptions,
+                "tool_calls": []
+            },
+            "coordinator_agent": {
+                "iteration": 0,
+                "final_answer": False,
+                "plan": [],
+                "next_agent": ""
+            },
+        }
+    elif mode == "hitl":
+        initial_state = Command(
+            resume={
+                "confirmed": question
+            }
+        )
     
     # 多轮对话设置 & 多轮对话
     config = {"configurable": {"thread_id": thread_id}}

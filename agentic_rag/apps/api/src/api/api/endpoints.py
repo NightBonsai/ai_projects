@@ -2,7 +2,7 @@ from starlette.responses import StreamingResponse
 from fastapi import Request, APIRouter
 import logging
 
-from api.api.models import RAGRequest, RAGResponse, RAGUsedContext, FeedbackRequest, FeedbackResponse
+from api.api.models import RAGRequest, RAGResponse, RAGUsedContext, FeedbackRequest, FeedbackResponse, HitlRequest
 from api.api.processors.submit_feedback import submit_feedback
 from api.agents.graph import rag_agent_stream_wrapper
 # from api.agents.retrieval_generation import rag_pipeline_wrapper    # 固定写死的 RAG 流程 (已弃用)
@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
 #         trace_id=answer["trace_id"]
 #     )
 
+# 提供给前端 Streamlit 调用后端服务的接口
+### Agentic RAG 服务接口 ###
 # 新端口: 流式输出
 agent_router = APIRouter()      # 初始化接口
 @agent_router.post("/")         # 注册接口
@@ -44,7 +46,7 @@ def agent(                      # 接口处理函数
 ) -> StreamingResponse:         # 流式输出
 
     return StreamingResponse(
-        rag_agent_stream_wrapper(payload.query, payload.thread_id),
+        rag_agent_stream_wrapper(payload.query, payload.thread_id, "initialize"),
         media_type="text/event-stream"
     )
 
@@ -65,15 +67,28 @@ def send_feedback(
     )
 
 
+### 用户 Human In The Loop 接口 ###
+hitl_router = APIRouter() 
+@hitl_router.post("/")
+def hitl(
+    request: Request,
+    payload: HitlRequest
+) -> StreamingResponse:
+    return StreamingResponse(
+        rag_agent_stream_wrapper(payload.approved, payload.thread_id, "hitl"),
+        media_type="text/event-stream"
+    )
+
+
 ### 总服务接口: 包含多个子接口 ###
 # 注册 API 路由，使 FastAPI 知道有哪些后端接口可以向前端提供服务
 # 总接口常规结构
 # api_router
 # ├── agent_router
 # ├── feedback_router
-# └── ...
+# └── hitl_router
 api_router = APIRouter()        
-api_router.include_router(agent_router, prefix="/agent", tags=["agent"])                    # http://localhost:8000/agent/ 
-api_router.include_router(feedback_router, prefix="/submit_feedback", tags=["feedback"])    # http://localhost:8000/submit_feedback/
-
+api_router.include_router(agent_router, prefix="/agent", tags=["agent"])                            # http://localhost:8000/agent/ 
+api_router.include_router(feedback_router, prefix="/submit_feedback", tags=["feedback"])            # http://localhost:8000/submit_feedback/
+api_router.include_router(hitl_router, prefix="/send_hitl_response", tags=["send_hitl_response"])   # http://localhost:8000/send_hitl_response/
 

@@ -191,8 +191,8 @@ if "hitl_decision" not in st.session_state:
     st.session_state.hitl_decision = None
 
 
-# Process HITL decision - stream the resumed graph response
-if st.session_state.hitl_decision is not None:
+# 处理 Human in the loop 结果 - stream the resumed graph response
+if st.session_state.hitl_decision is not None: 
     decision = st.session_state.hitl_decision
     st.session_state.hitl_decision = None
 

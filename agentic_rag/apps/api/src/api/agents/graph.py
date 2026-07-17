@@ -72,16 +72,13 @@ def hitl_add_to_cart(state) -> Command[Literal["shopping_cart_agent_tool_node", 
             items_to_add = tool_call.arguments["items"]
             break
 
-    human_input = interrupt({
-        "items_to_add": items_to_add
-    })
-
-    if human_input.get("confirmed"):
+    human_input = interrupt({"items_to_add": items_to_add}) # 获取前端用户确认
+    if human_input.get("confirmed"):    # 确认添加
         return Command(
             update={},
-            goto="shopping_cart_agent_tool_node"
+            goto="shopping_cart_agent_tool_node"    # 执行 tool
         )
-    else:
+    else:                               # 确认不添加
         last_msg = state.messages[-1]
         sanitized = AIMessage(
             content=last_msg.content,
@@ -93,7 +90,7 @@ def hitl_add_to_cart(state) -> Command[Literal["shopping_cart_agent_tool_node", 
                 "messages": [sanitized],
                 "answer": "You have rejected the addition of items to the cart."
             }, 
-            goto=END
+            goto=END                                # 路由到 END
         )
 
 
@@ -130,8 +127,8 @@ def shopping_cart_agent_tool_edge(state) -> str:
     
     add_to_cart_tool_call = False
     for tool_call in state.shopping_cart_agent.tool_calls:
-        if tool_call.name == "add_to_shopping_cart":
-            add_to_cart_tool_call = True
+        if tool_call.name == "add_to_shopping_cart":    # 若有调用 shopping cart agent 
+            add_to_cart_tool_call = True                # 启用 Human in the loop
         break
 
     if state.shopping_cart_agent.final_answer:          # 是否为最终回答
@@ -140,7 +137,7 @@ def shopping_cart_agent_tool_edge(state) -> str:
         return "end"
     elif len(state.shopping_cart_agent.tool_calls) > 0: # Agent 请求调用 Tool
         if add_to_cart_tool_call:
-            return "hitl_add_to_cart"
+            return "hitl_add_to_cart"                   # 进入 Human in the loop
         else:
             return "tools"
     else:

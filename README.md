@@ -229,4 +229,10 @@ docker compose up --build
      LangSmith
      ```
    
-     
+   - 购物车操作 Human in the loop 实现
+   
+     ```
+     添加 hitl 节点，等待用户确认 or 拒绝指定操作
+     ```
+   
+     ![multi-agents-image](./agentic_rag/images/multi-agents-image-3.0.png)

@@ -83,11 +83,15 @@ docker compose up --build
 
 7. 按照 env.example 的格式设置 .env
 
-8. 往 Qdrant 向量数据库中录入数据
+8. 初始化 Qdrant 向量数据库并录入数据 (商品信息)
 
    - 录入方式详见 notbooks
 
-9. 启动指定项目
+9. 初始化 Postgres 数据库并录入数据 (购物车 & 商品库存)
+
+   - 录入方式详见 notbooks
+
+10. 启动指定项目
 
    - 指定项目 根目录 下执行
 
@@ -215,7 +219,7 @@ docker compose up --build
 
    - A2A 协议尝试 **(可选)** **(未实现)**
 
-5. LLMOps
+5. LLMOps 实现：
 
    - 引入多个 LLM APIs，提高系统健壮性
 
@@ -236,3 +240,12 @@ docker compose up --build
      ```
    
      ![multi-agents-image](./agentic_rag/images/multi-agents-image-3.0.png)
+   
+   - 项目部署到云端运行 **(未实现)**
+   
+     ```
+     Qdrant → Qdrant Cloud
+     Postgres → Superbase
+     ```
+     
+     

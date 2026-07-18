@@ -16,3 +16,6 @@
 # 所有项目的 Python 缓存
 **/__pycache__/
 **/*.pyc
+
+# 简历内容
+**/Introduction.md

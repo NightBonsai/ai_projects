@@ -8,7 +8,7 @@
 
 ### agentic_rag (Amazon Shopping Assistant)
 
-基于 Coordinator + Specialist Agents 多智能体协同 ReAct 架构的 Amazon 网购智能助手
+基于 LangGraph 多智能体与 Agentic RAG 的 AI 智能购物助手
 
 ------
 
@@ -116,8 +116,8 @@ docker compose up --build
 ## 已完成内容
 
 1. 项目原型构建: 
-   - Streamlit 前端 
-   - FastAPI 后端
+   - Streamlit 实现前端服务 
+   - FastAPI 封装后端服务
 
 2. RAG 流程实现：
 
@@ -157,10 +157,11 @@ docker compose up --build
 
 3. Agentic RAG 系统实现：
 
-   - 重构 RAG 固定流程为 ReAct-Style Tool Calling Agent
+   - 重构固定 RAG 流程为 ReAct-Style Tool Calling Agent
 
      ```
-     LangGraph: 用户意图识别 + 用户查询重写 + ReAct-Style Tool Calling
+     LangGraph: 用户意图识别 + 用户查询重写 + ReAct-Style Tool Calling 
+     RAG 变成一个 tool 供 agent 调用
      ```
 
      ![multi-turn-agent-image](./agentic_rag/images/multi-turn-agent-image.png)
@@ -216,6 +217,10 @@ docker compose up --build
      ![multi-agents-image](./agentic_rag/images/multi-agents-image-2.0.png)
 
    - Google Agent Development Kit 尝试 **(可选)** **(未实现)**
+
+     ```
+     重构 warehouse_manager_agent
+     ```
 
    - A2A 协议尝试 **(可选)** **(未实现)**
 

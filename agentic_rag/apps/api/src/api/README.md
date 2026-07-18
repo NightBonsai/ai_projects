@@ -1,6 +1,6 @@
 # Amazon Shopping Assistant
 
-## Agentic_RAG
+## Multi-Agents + Agentic_RAG
 
 实现 检索 Retrieval + 增强 Augmented + 生成 Generation 的固定 Pipeline Chain 流程 
 
@@ -10,7 +10,7 @@
 LLM 负责决策，Tool 负责执行，Graph 负责控制整个流程
 ```
 
-实现 基于 Coordinator + Specialist Agents 多智能体协同 ReAct 架构的 Amazon 网购智能助手
+实现 基于 LangGraph 多智能体与 Agentic RAG 的 AI 智能购物助手
 
 ```
 Coordinator Agent
@@ -56,19 +56,12 @@ POST /rag/
     ↓
 rag()          ← 自定义 FastAPI 接口函数
     ↓
-rag_pipeline() ← 用户提问变 Embedding → 去向量数据库检索相似资料 → 资料作为 prompt 塞给 LLM → LLM基于资料回答
+rag_pipeline() ← 自定义 RAG 流程封装函数
+	|			 	Embedding/BM25 → Qdrant 检索 → 拼接 prompt → OpenAI ChatCompletion
     ↓
-retrieve_data()
+返回 answer
     ↓
-Qdrant
-    ↓
-OpenAI
-    ↓
-生成回复
-    ↓
-返回给 rag()
-    ↓
-返回 JSON
+rag()
     ↓
 Streamlit 显示回复
 ```
@@ -86,13 +79,21 @@ Streamlit UI
     ↓
 POST /agent/
     ↓
-agent()                 	← 自定义 FastAPI 接口函数
+agent()						← 自定义 FastAPI 接口函数
+send_feedback()				← 自定义 FastAPI 接口函数
+hitl()						← 自定义 FastAPI 接口函数
     ↓
-rag_agent_stream_wrapper() 	← Agentic RAG 流程封装函数
+rag_agent_stream_wrapper() 	← 自定义 Agentic RAG 流程封装函数
+							  	graph.stream()	← 流式输出
+							  	LangGraph Workflow
+							  	OpenAI ChatCompletion
+submit_feedback()			← 自定义 用户反馈提交 流程封装函数
     ↓
-for chunk in graph.stream(initial_state, config=..., stream_mode=[...])	← 流式输出
+生成 answer
     ↓
-LangGraph Workflow
+agent()
+    ↓
+Streamlit 显示回复
 ```
 
 prompts/*				存储 Prompts	

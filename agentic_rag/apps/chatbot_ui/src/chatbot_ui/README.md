@@ -1,6 +1,6 @@
 # Amazon Shopping Assistant
 
-## Agentic_RAG
+## Multi-Agents + Agentic_RAG
 
 实现 检索 Retrieval + 增强 Augmented + 生成 Generation 的固定 Pipeline Chain 流程 
 
@@ -10,7 +10,7 @@
 LLM 负责决策，Tool 负责执行，Graph 负责控制整个流程
 ```
 
-实现 基于 Coordinator + Specialist Agents 多智能体协同 ReAct 架构的 Amazon 网购智能助手
+实现 基于 LangGraph 多智能体与 Agentic RAG 的 AI 智能购物助手
 
 ```
 Coordinator Agent

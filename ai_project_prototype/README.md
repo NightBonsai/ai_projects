@@ -1,3 +1,5 @@
+<a href="./README.md">🇨🇳 中文</a> | <a href="./README_EN.md">🇺🇸 English</a>
+
 # ai_project_prototype
 
 可复用的 AI 项目原型
@@ -29,6 +31,8 @@ cd D:\ai_projects\新项目
 
 ------
 
+
+
 ## 1. 删除旧环境
 
 删除 .venv/ 保留剩余内容
@@ -40,6 +44,8 @@ Remove-Item .venv -Recurse -Force
  `.venv` 是可再生的。`uv sync` 会自动重新创建。([Astral Docs](https://docs.astral.sh/uv/reference/cli/?utm_source=chatgpt.com))
 
 ------
+
+
 
 ## 2. 修改项目名称
 
@@ -68,6 +74,8 @@ name = "新项目"
 
 ------
 
+
+
 ## 3. 重新生成环境
 
 执行：
@@ -84,6 +92,8 @@ uv sync
 
 ------
 
+
+
 ## 4. 验证环境
 
 检查：
@@ -99,6 +109,8 @@ uv pip list
 确认依赖是否都已安装
 
 ------
+
+
 
 ## 5. Cursor 重新选择解释器
 

@@ -1,3 +1,5 @@
+<a href="./README.md">🇨🇳 中文</a> | <a href="./README_EN.md">🇺🇸 English</a>
+
 # ai_projects
 
 ## 项目信息
@@ -97,7 +99,8 @@ docker compose up --build
 
      ```
      uv sync
-     docker compose up --build
+     docker compose up --build	# 第一次构建容器需执行
+     docker compose up 			# 后续启动容器需执行
      ```
 
    - 通过浏览器访问 FastAPI 后端服务，Streamlit 前端服务和 Qdrant 向量数据库
